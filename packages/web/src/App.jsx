@@ -330,9 +330,9 @@ function Playground({ evidence }) {
             <br />A world closer<span>.</span>
           </h1>
           <p className="hero-description">
-            Any wallet, any chain, one NEAR account.
-            <br className="desktop-break" /> Keep the wallet you know. Connect
-            to what’s next.
+            EVM or Solana wallets, acting on NEAR.
+            <br className="desktop-break" /> Chain Signatures to Sepolia. Keep
+            your wallet.
           </p>
           <a className="text-link" href="#docs">
             Build with Tong <ArrowUpRight size={17} />

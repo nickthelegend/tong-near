@@ -11,7 +11,7 @@ Rust NEAR contracts, JavaScript connector SDK with a React hook, Node relayer an
 Existing EVM and Solana wallet holders trying a NEAR dApp, dApp developers adding a connector, and hackathon judges reproducing the flow.
 
 ## Product Purpose
-Any wallet, any chain, one NEAR account. Prove foreign-wallet authorization on NEAR and outbound signing through Chain Signatures without asking the user to create a NEAR key.
+EVM or Solana wallets acting on NEAR, with Chain Signatures to Sepolia. Prove foreign-wallet authorization on NEAR and outbound signing through Chain Signatures without asking the user to create a NEAR key.
 
 ## Capabilities and Constraints
 Testnet only. EIP-712 secp256k1 and domain-separated ed25519 requests, deterministic controlled accounts, nonces, expiry and bounded actions. 1Click is an explicitly labeled mainnet dry quote, never a testnet bridge. Record real transactions; disclose external blocks.

@@ -12,7 +12,11 @@ Sepolia test ETH funding and broadcast are **Nick's manual step**. R3 made no fa
 node scripts/broadcast-sepolia.mjs
 ```
 
-The command selects the newest timestamped signed-transaction evidence, verifies the signer against the current derived public key, and writes separate broadcast/receipt records without altering signed evidence. `node scripts/broadcast-sepolia.mjs --check-only` sends nothing; R3 ran it once and got **BLOCKED: insufficient Sepolia test ETH**. If the live base fee later exceeds 64 wei, a new app-authorized signature is required before broadcasting; no changed transaction can reuse this signature.
+The command selects the newest timestamped signed-transaction evidence, verifies the signer against the current derived public key, and writes separate broadcast/receipt records without altering signed evidence. `node scripts/broadcast-sepolia.mjs --check-only` sends nothing; R3 ran it twice and got **BLOCKED: insufficient Sepolia test ETH**. If the live base fee later exceeds 64 wei, a new app-authorized signature is required before broadcasting; no changed transaction can reuse this signature.
+
+## Wallet extension approvals — BLOCKED / manual
+
+No MetaMask or Phantom extension was downloaded or automated in R3, as explicitly instructed. A human still needs to connect and approve the real-wallet flows in `TESTING.md`. The earlier Playwright-injected provider does not count as either extension's approval test.
 
 ## Public demo and submission — pending human tasks
 

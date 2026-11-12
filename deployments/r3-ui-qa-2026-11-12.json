@@ -1,0 +1,22 @@
+{
+  "at": "2026-11-12T11:23:11.529Z",
+  "start_commit": "231db43",
+  "scope": "Copy only; existing components, CSS and layout preserved",
+  "viewports": [
+    {
+      "width": 1440,
+      "matched_elements": 12,
+      "layout_identical": true,
+      "before_screenshot": "before-1440.png",
+      "after_screenshot": "after-1440.png"
+    },
+    {
+      "width": 375,
+      "matched_elements": 12,
+      "layout_identical": true,
+      "before_screenshot": "before-375.png",
+      "after_screenshot": "after-375.png"
+    }
+  ],
+  "css_unchanged": true
+}
