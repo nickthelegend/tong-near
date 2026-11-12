@@ -1,0 +1,13 @@
+.loom/
+node_modules/
+dist/
+target/
+.tools/
+.demo/
+.near-credentials/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+packages/contract/res/*.wasm

@@ -1,0 +1,1 @@
+{"name":"@tong/sdk","version":"0.1.0","type":"module","license":"MIT","main":"./src/index.mjs","exports":{".":"./src/index.mjs","./react":"./src/react.mjs"},"dependencies":{"ethers":"6.15.0","@noble/curves":"1.9.7","bs58":"6.0.0"},"peerDependencies":{"react":">=18"},"peerDependenciesMeta":{"react":{"optional":true}}}

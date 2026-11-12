@@ -1,0 +1,1 @@
+{"name":"@tong/relayer","version":"0.1.0","type":"module","private":true,"dependencies":{"@tong/sdk":"workspace:*","near-api-js":"7.0.2"}}

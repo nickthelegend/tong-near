@@ -1,0 +1,5 @@
+packages:
+  - packages/sdk
+  - packages/relayer
+  - packages/mcp
+  - packages/web

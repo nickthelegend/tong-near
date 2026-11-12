@@ -1,0 +1,5 @@
+# Tong visual system
+
+The user pinned the world: pearl, coral, supplied rounded 3D connector objects, and the quality of modern wallet connector documentation. The demo is an Operate surface framed by a short product introduction; docs are Read. Design choices extend this brief without reopening it.
+
+Warm paper (#faf7f4), pearl (#f1e9e4), ink (#292321), coral (#d94d60). Coral is an action color; pale blush carries the wallet workbench. No glowing art or gradient headlines. Self-hosted Manrope for UI and display, monospace only for addresses/code. Spacious asymmetric first viewport: editorial statement at left, live connect workbench at right. Desktop uses a fine vertical rail and broad whitespace; mobile puts the workbench immediately after the short intro. Supplied plug illustration bridges the two areas. Progress is a plain linked activity list, not numbered cards. Wallet modes have accessible selected state. Every pending, failed and blocked result is textual and distinct from success.

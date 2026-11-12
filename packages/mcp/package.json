@@ -1,0 +1,1 @@
+{"name":"@tong/mcp","version":"0.1.0","type":"module","private":true,"dependencies":{"@tong/sdk":"workspace:*","@modelcontextprotocol/sdk":"1.25.3","zod":"3.25.76"}}
