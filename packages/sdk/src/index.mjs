@@ -24,7 +24,7 @@ export function validateRequest(r, contractId, now = Math.floor(Date.now()/1000)
   if (!['nonce','deadline'].every(k=> typeof r[k]==='string' && /^(0|[1-9][0-9]*)$/.test(r[k]) && BigInt(r[k])<2n**64n)) throw new Error('Invalid integer');
   if (BigInt(r.deadline)<BigInt(now) || BigInt(r.deadline)>BigInt(now+300)) throw new Error('Expired or excessive deadline');
   if (typeof r.data!=='string' || new TextEncoder().encode(r.data).length>1024) throw new Error('Data too large');
-  if (!(r.action in FEES)) throw new Error('Disallowed action');
+  if (!Object.hasOwn(FEES,r.action)) throw new Error('Disallowed action');
   const data=JSON.parse(r.data);
   const keys=Object.keys(data).sort().join(',');
   if(r.action==='link' && r.data!=='{}') throw new Error('Link data must be empty');

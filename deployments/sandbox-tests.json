@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-12T07:38:55.284Z",
+  "network": "local sandbox",
+  "passed": 12,
+  "checks": [
+    "valid EVM EIP-712 signature creates keyless controlled account",
+    "replay rejected on chain",
+    "wrong EVM signer rejected",
+    "expired request rejected",
+    "wrong domain rejected",
+    "disallowed action rejected",
+    "tampered action data rejected",
+    "valid signed NEAR note action executes on child",
+    "child refuses direct relayer call",
+    "valid ed25519 signature creates distinct controlled account",
+    "wrong ed25519 signer rejected",
+    "unbounded Sepolia value rejected on chain"
+  ]
+}

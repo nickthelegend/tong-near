@@ -1,0 +1,35 @@
+{
+  "at": "2026-11-12T07:40:37.285Z",
+  "network": "testnet",
+  "chain_id": 11155111,
+  "mpc_contract": "v1.signer-prod.testnet",
+  "predecessor": "dbeccc0e7914c5bf5c0af9f6b7ed469025f508e2.tong-d8l0q0.testnet",
+  "path": "tong:sepolia:11155111",
+  "derived_address": "0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8",
+  "near_tx_hash": "2s9kMWVT6UGVSn625LuMGgnTYPzd5e3ikRXZ9trxNUZy",
+  "near_explorer": "https://testnet.nearblocks.io/txns/2s9kMWVT6UGVSn625LuMGgnTYPzd5e3ikRXZ9trxNUZy",
+  "transfer": {
+    "to": "0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8",
+    "value_wei": "0",
+    "nonce": "0",
+    "gas_price_wei": "64"
+  },
+  "signature": {
+    "scheme": "Secp256k1",
+    "big_r": {
+      "affine_point": "03555e3611486c26a1738a4cea629af37076864498c96bd4c093a9dddd448ad2fe"
+    },
+    "s": {
+      "scalar": "6b28cae80820e9af47b0a27308354cd65a125c47572db34f2f7348eb58f51661"
+    },
+    "recovery_id": 1
+  },
+  "rawTransaction": "0xf8638040825208941b5e316144d8afb875b4c8ab751f83f463e4afa880808401546d72a0555e3611486c26a1738a4cea629af37076864498c96bd4c093a9dddd448ad2fea06b28cae80820e9af47b0a27308354cd65a125c47572db34f2f7348eb58f51661",
+  "hash": "0xfe9f2ca6391830b66b1ce601b1b444899baa632d7949124291e431582e5367c0",
+  "from": "0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8",
+  "unsignedHash": "0x6c4a9cf07c5736fc7ec294db9b97a1c6feb4c4d239d20d41b111aed03b3154b8",
+  "balance_wei": "0",
+  "required_gas_wei": "1344000",
+  "broadcast_status": "BLOCKED",
+  "broadcast_reason": "Derived Sepolia address has no test ETH for gas. Signed transaction is real and recovered to the derived address."
+}

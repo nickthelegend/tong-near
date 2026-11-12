@@ -1,0 +1,62 @@
+{
+  "network": "mainnet",
+  "dry": true,
+  "route": "10 USDC · Ethereum → NEAR",
+  "request": {
+    "dry": true,
+    "swapType": "EXACT_INPUT",
+    "slippageTolerance": 100,
+    "originAsset": "nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near",
+    "depositType": "ORIGIN_CHAIN",
+    "destinationAsset": "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+    "amount": "10000000",
+    "recipient": "0000000000000000000000000000000000000000000000000000000000000001",
+    "recipientType": "DESTINATION_CHAIN",
+    "refundTo": "0x0000000000000000000000000000000000000001",
+    "refundType": "ORIGIN_CHAIN",
+    "deadline": "2026-11-12T07:45:38.059Z"
+  },
+  "result": {
+    "quote": {
+      "amountIn": "10000000",
+      "amountInFormatted": "10.0",
+      "amountInUsd": "9.994840000000",
+      "minAmountIn": "10000000",
+      "amountOut": "9993578",
+      "amountOutFormatted": "9.993578",
+      "amountOutUsd": "9.988421313752",
+      "minAmountOut": "9893642",
+      "timeEstimate": 45,
+      "refundFee": "300000",
+      "withdrawFee": "4403"
+    },
+    "quoteRequest": {
+      "dry": true,
+      "depositMode": "SIMPLE",
+      "swapType": "EXACT_INPUT",
+      "slippageTolerance": 100,
+      "originAsset": "nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near",
+      "depositType": "ORIGIN_CHAIN",
+      "destinationAsset": "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+      "amount": "10000000",
+      "refundTo": "0x0000000000000000000000000000000000000001",
+      "refundType": "ORIGIN_CHAIN",
+      "recipient": "0000000000000000000000000000000000000000000000000000000000000001",
+      "recipientType": "DESTINATION_CHAIN",
+      "deadline": "2026-11-12T07:45:38.059Z",
+      "confidentiality": "public",
+      "quoteWaitingTimeMs": 0,
+      "insured": false,
+      "appFees": [
+        {
+          "recipient": "5880ad2b362620fadf759cbceb1cd5737ce8c6ed7fb8e9942881e6731f9247dd",
+          "fee": 1
+        }
+      ]
+    },
+    "signature": "ed25519:29twfordz8NA2f9AypW1wK7RGayK8Vggyrh5Cd88To3nS7AiiCjy4qzTjk84z6EP69C7obFgDEh9U1ctRexhv6bx",
+    "timestamp": "2026-11-12T07:40:38.228Z",
+    "correlationId": "90010d5d-2187-47fc-ba85-1bd3526501f8"
+  },
+  "at": "2026-11-12T07:40:38.697Z"
+}

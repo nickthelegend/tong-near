@@ -1,6 +1,6 @@
 import { readFile, writeFile, rename, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { FEES, validateRequest, verifyAuthorization, view, explorer } from '@tong/sdk';
+import { FEES, validateRequest, verifyAuthorization, view, explorer, rpc } from '@tong/sdk';
 export const GAS=280_000_000_000_000n;
 export class Budget {
   constructor(file,{maxCost=4n*10n**24n,maxCalls=40}={}){Object.assign(this,{file,maxCost,maxCalls});}
@@ -9,8 +9,9 @@ export class Budget {
     let state;
     try {state=JSON.parse(await readFile(this.file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw new Error('Budget ledger unreadable; refusing to spend');}
     if(!state || state.day!==day)state={day,calls:0,reserved:'0'};
-    // 0.01 NEAR conservative gas allowance per request; reservations survive failed transactions.
-    const cost=BigInt(deposit)+10n**22n;
+    // 0.1 NEAR gas reserve covers 280 Tgas at the enforced gas-price ceiling.
+    // Reservations survive failed transactions.
+    const cost=BigInt(deposit)+10n**23n;
     if(state.calls>=this.maxCalls || BigInt(state.reserved)+cost>this.maxCost)throw new Error('Daily sponsorship budget exhausted');
     state.calls++;state.reserved=String(BigInt(state.reserved)+cost);
     await mkdir(dirname(this.file),{recursive:true});await writeFile(`${this.file}.tmp`,JSON.stringify(state),{mode:0o600});await rename(`${this.file}.tmp`,this.file);return state;
@@ -30,6 +31,8 @@ export async function relay({authorization,contractId,account,rpcUrl,budget,reco
   const identity=await view(contractId,'get_identity',{wallet:request.wallet},rpcUrl);
   if(request.nonce!==(identity?.nonce??'0'))throw new Error('Wrong nonce or replay');
   if(request.action==='link' ? identity!==null : !identity?.ready)throw new Error(request.action==='link'?'Already linked':'Link the wallet first');
+  const gasPrice=BigInt((await rpc('gas_price',[null],rpcUrl)).gas_price);
+  if(gasPrice>150_000_000n)throw new Error('Network gas price exceeds sponsorship policy');
   await budget.reserve(FEES[request.action]);
   let outcome;
   try {outcome=await account.callFunctionRaw({contractId,methodName:'execute',args:{request,signature},gas:GAS,deposit:BigInt(FEES[request.action]),waitUntil:'FINAL'});}
