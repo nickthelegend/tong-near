@@ -4,6 +4,8 @@
 
 The saved MPC signature recovers to `0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8`. R3 revalidated it against a live Sepolia block: **25 wei base fee**, **50 wei at 2× base fee**, versus the saved **64 wei/gas**. The saved transaction was not underpriced, so the conditional fresh MPC request was not needed. This is reuse of the existing signature, not a claim of a new MPC response. The original [chain-signature.json](deployments/chain-signature.json) is unchanged; the separate [R3 signed-transaction evidence](deployments/chain-signature-r3-2026-11-12.json) records the fee check and recovered signer.
 
+The follow-up preflight at **11:30 UTC** found a **16-wei base fee** (2× = 32 wei), so the same 64-wei signature remains adequately priced at that check. No replacement signature was required.
+
 For this zero-value, 21,000-gas signed transaction, the exact maximum debit is **1,344,000 wei = 0.000000000001344 Sepolia test ETH**. Its recorded balance remains **0 wei**, so the shortfall is the full amount. That amount funds this exact signature only; it does not guarantee the gas price stays above a future base fee. The command rechecks the live fee, nonce and balance and refuses an underpriced or stale transaction.
 
 Sepolia test ETH funding and broadcast are **Nick's manual step**. R3 made no faucet request, ETH transfer or broadcast, and spent **0 test NEAR**. No real/mainnet ETH is needed or requested. After Nick supplies Sepolia test ETH, the one command is:
@@ -12,7 +14,7 @@ Sepolia test ETH funding and broadcast are **Nick's manual step**. R3 made no fa
 node scripts/broadcast-sepolia.mjs
 ```
 
-The command selects the newest timestamped signed-transaction evidence, verifies the signer against the current derived public key, and writes separate broadcast/receipt records without altering signed evidence. `node scripts/broadcast-sepolia.mjs --check-only` sends nothing; R3 ran it twice and got **BLOCKED: insufficient Sepolia test ETH**. If the live base fee later exceeds 64 wei, a new app-authorized signature is required before broadcasting; no changed transaction can reuse this signature.
+The command selects the newest timestamped signed-transaction evidence, verifies the signer against the current derived public key, and writes separate broadcast/receipt records without altering signed evidence. `node scripts/broadcast-sepolia.mjs --check-only` sends nothing; R3 ran it three times and got **BLOCKED: insufficient Sepolia test ETH**. If the live base fee later exceeds 64 wei, a new app-authorized signature is required before broadcasting; no changed transaction can reuse this signature.
 
 ## Wallet extension approvals — BLOCKED / manual
 

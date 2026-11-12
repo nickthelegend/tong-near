@@ -10,7 +10,7 @@ Start commit: `231db43`. Factory: `tong-d8l0q0.testnet`, unchanged and locked. S
 | Prior art | DONE / PASS | README “How Tong differs” cites NEAR account docs, official Ethereum wallets package and NEP-518; own claims link implementation and live evidence. No claim that EVM login or keylessness is new. |
 | Wallet extensions | DONE as instructed; human approvals BLOCKED / manual | Zero extensions downloaded or automated. Real MetaMask/Phantom approvals were not executed; TESTING.md retains the human checks. |
 | Sepolia preparation | DONE / PASS | One read-only revalidation, expected signer recovered; no new MPC request needed. New evidence file saved beside the untouched original. |
-| Sepolia broadcast | BLOCKED | Two no-send preflights selected newest evidence and reported 0 wei balance; exact signed-transaction requirement is 1,344,000 wei (0.000000000001344 Sepolia test ETH). Nick owns funding/broadcast. |
+| Sepolia broadcast | BLOCKED | Three no-send preflights selected newest evidence and reported 0 wei balance; exact signed-transaction requirement is 1,344,000 wei (0.000000000001344 Sepolia test ETH). Nick owns funding/broadcast. |
 | Unit tests | PASS | 8 executed / 8 passed, including 2 new evidence-selector tests. |
 | Web build | PASS | 1 production build executed. |
 | Evidence preservation | PASS | 17 start-commit deployment files verified byte-for-byte unchanged. |
@@ -33,3 +33,11 @@ Nick's command after manual Sepolia test-ETH funding: `node scripts/broadcast-se
 Before/after files: `before-1440.png`, `after-1440.png`, `before-375.png`, `after-375.png` in the local `tong/r3` screenshot folder. Screenshots were captured locally during QA and are not committed. [Layout comparison](deployments/r3-ui-qa-2026-11-12.json) records 24 identical geometry/font records across the two widths. Existing components, sizes, layout, palette, fonts and art were preserved.
 
 R3 did not rerun the earlier 12-check sandbox suite, original paid browser flows or MCP smoke test. No old test outcome is counted as a new R3 execution. No push, public hosting/deployment, post, film change, wallet extension download, mainnet action or contract-key deletion occurred.
+
+## Follow-up acceptance verification — 11:30 UTC
+
+The repeated R3 brief was checked against committed work at `0e58b77`. The dead-link grep remained empty; the broad scope phrase remained roadmap-only. The existing 1440/375 before/after screenshot files were confirmed present, and CSS/contracts still match the original R3 start commit. No UI change or new browser capture was needed.
+
+One additional `node scripts/broadcast-sepolia.mjs --check-only` execution selected the R3 signature record and recovered the same signer. At **2026-11-12T11:30:44.571Z**, base fee was **16 wei** (2× = **32 wei**), below the saved **64 wei/gas**. No fresh MPC request was warranted. Balance remained 0 wei, so the preflight was **BLOCKED** by the same 1,344,000-wei Sepolia test-ETH shortfall. The transaction remains unbroadcast; no new NEAR transaction hashes or spending occurred. [Follow-up preflight](deployments/sepolia-broadcast-20261112T113044571Z-fe9f2ca639-check.json).
+
+This follow-up ran **1 no-send preflight, 0 unit/build/browser reruns, 0 wallet-extension operations, 0 chain writes**, bringing the recorded R3 no-send preflight count to 3. Previous signed evidence files remain unchanged.
