@@ -2,11 +2,17 @@
 
 ## Sepolia broadcast — BLOCKED
 
-A real signature was returned by testnet MPC and assembled into a signed EIP-155 Sepolia transaction. Recovered address: `0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8`. At capture the derived address had **0 wei**. [deployments/chain-signature.json](deployments/chain-signature.json) records the exact gas requirement, signed bytes and NEAR request receipt.
+The saved MPC signature recovers to `0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8`. R3 revalidated it against a live Sepolia block: **25 wei base fee**, **50 wei at 2× base fee**, versus the saved **64 wei/gas**. The saved transaction was not underpriced, so the conditional fresh MPC request was not needed. This is reuse of the existing signature, not a claim of a new MPC response. The original [chain-signature.json](deployments/chain-signature.json) is unchanged; the separate [R3 signed-transaction evidence](deployments/chain-signature-r3-2026-11-12.json) records the fee check and recovered signer.
 
-A no-CAPTCHA faucet was found: [RPC Gateway Sepolia](https://rpc.aurpay.net/faucets/ethereum-sepolia). Its [published eligibility](https://rpc.aurpay.net/docs/faucet) requires the receiving address already hold 0.0001 ETH on Ethereum mainnet. This freshly derived test address is not eligible. No mainnet funds were sent. The [PoW faucet](https://sepolia-faucet.pk910.de/) requires browser mining work; the usual Google faucet requires a human account. No CAPTCHA, login or anti-bot requirement was bypassed.
+For this zero-value, 21,000-gas signed transaction, the exact maximum debit is **1,344,000 wei = 0.000000000001344 Sepolia test ETH**. Its recorded balance remains **0 wei**, so the shortfall is the full amount. That amount funds this exact signature only; it does not guarantee the gas price stays above a future base fee. The command rechecks the live fee, nonce and balance and refuses an underpriced or stale transaction.
 
-To unblock, send a small amount of **Sepolia test ETH** to the derived address, then run `node scripts/broadcast-sepolia.mjs`. That script verifies chain ID, recovered signer, nonce and balance before broadcasting the saved transaction. It records the broadcast and receipt honestly; an underpriced saved transaction requires a fresh user-signed request, not a changed transaction under the old signature.
+Sepolia test ETH funding and broadcast are **Nick's manual step**. R3 made no faucet request, ETH transfer or broadcast, and spent **0 test NEAR**. No real/mainnet ETH is needed or requested. After Nick supplies Sepolia test ETH, the one command is:
+
+```sh
+node scripts/broadcast-sepolia.mjs
+```
+
+The command selects the newest timestamped signed-transaction evidence, verifies the signer against the current derived public key, and writes separate broadcast/receipt records without altering signed evidence. `node scripts/broadcast-sepolia.mjs --check-only` sends nothing; R3 ran it once and got **BLOCKED: insufficient Sepolia test ETH**. If the live base fee later exceeds 64 wei, a new app-authorized signature is required before broadcasting; no changed transaction can reuse this signature.
 
 ## Public demo and submission — pending human tasks
 

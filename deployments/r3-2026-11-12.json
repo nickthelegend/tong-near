@@ -1,0 +1,25 @@
+{
+  "at": "2026-11-12T11:12:39.481Z",
+  "round": "R3",
+  "start_commit": "231db43",
+  "network": "testnet",
+  "account_id": "relay.tong-d8l0q0.testnet",
+  "credential_source": "TONG_RELAYER_KEY_FILE path",
+  "budget_limit_yocto": "300000000000000000000000",
+  "cumulative_spend_yocto": "0",
+  "cumulative_spend_near": "0",
+  "transactions": [],
+  "balance_checks": [
+    {
+      "at": "2026-11-12T11:12:39.481Z",
+      "account_id": "relay.tong-d8l0q0.testnet",
+      "amount": "9657076387022894500000000",
+      "storage_usage": 182,
+      "block_hash": "7pnHmmib7QXstxFVK5Jj3CRSW6DGeGfbiM3YYhcfLzfH",
+      "block_height": 277355086,
+      "purpose": "Confirm own relayer; no write required"
+    }
+  ],
+  "evidence_file": "deployments/chain-signature-r3-2026-11-12.json",
+  "result": "Existing signature revalidated; conditional fresh-sign request not needed."
+}

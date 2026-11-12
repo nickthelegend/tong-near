@@ -88,3 +88,13 @@ Reference hashes are in [testnet.json](deployments/testnet.json). The build comm
 ## Honest limits
 
 Sandbox tests exercise real NEAR WASM but do not recreate the external MPC cluster. Live testnet captures cover MPC success. No load test, third-party security audit, live Solana extension automation, mainnet transfer, executed swap or funded Sepolia broadcast is claimed. See [BLOCKED.md](BLOCKED.md).
+
+## R3 targeted checks (November 12, 2026)
+
+- **8 unit tests executed, 8 PASS** with `pnpm test`: the six existing protocol/budget tests plus two newest-evidence selection tests. The selector is tested against timestamps rather than filesystem write order and leaves the original fixture unchanged.
+- **1 Sepolia preparation/revalidation executed, PASS** with `node scripts/r3-prepare-sepolia.mjs`. The current base fee was 25 wei; the saved gas price was 64 wei, above the 50-wei 2× target. No new MPC request or NEAR transaction was necessary. [chain-signature-r3-2026-11-12.json](deployments/chain-signature-r3-2026-11-12.json) includes the existing signature, its original signing timestamp, the new fee check and recovered signer. Existing evidence was not overwritten.
+- **1 broadcast preflight executed, BLOCKED** with `node scripts/broadcast-sepolia.mjs --check-only`: the newest evidence was selected, the signer matched, but balance was 0 wei against a 1,344,000-wei requirement. This option cannot send a transaction.
+- **0 new NEAR transactions, 0 test NEAR spent**, against the 0.3-test-NEAR R3 limit. Tong's own relayer was identified using the `TONG_RELAYER_KEY_FILE` path, and its balance was checked read-only. [r3-2026-11-12.json](deployments/r3-2026-11-12.json) records the balance, empty transaction list and cumulative spend.
+- **0 wallet extensions downloaded or automated.** Human MetaMask and Phantom approval remains **BLOCKED / manual** under the explicit R3 instruction. The manual checks above still apply; a Playwright test provider is not a real wallet extension.
+
+R3 did not rerun the 12-check WASM sandbox suite or the original paid browser flows; their earlier results remain historical evidence, not additional R3 executions.

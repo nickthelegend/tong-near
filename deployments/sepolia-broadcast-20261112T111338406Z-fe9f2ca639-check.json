@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-12T11:13:38.406Z",
+  "chain_id": 11155111,
+  "signed_evidence_file": "chain-signature-r3-2026-11-12.json",
+  "derived_address": "0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8",
+  "tx_hash": "0xfe9f2ca6391830b66b1ce601b1b444899baa632d7949124291e431582e5367c0",
+  "balance_wei": "0",
+  "required_wei": "1344000",
+  "required_eth": "0.000000000001344",
+  "nonce": "0",
+  "base_fee_wei": "27",
+  "gas_price_wei": "64",
+  "check_only": true,
+  "status": "BLOCKED",
+  "reason": "Insufficient Sepolia test ETH for the selected signed transaction. Funding is Nick’s manual step."
+}
