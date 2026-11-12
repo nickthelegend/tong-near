@@ -1,0 +1,108 @@
+{
+  "at": "2026-11-12T07:54:53.433Z",
+  "status": 200,
+  "account_id": "tong-gas-d95rai.testnet",
+  "result": {
+    "final_execution_status": "EXECUTED_OPTIMISTIC",
+    "receipts_outcome": [
+      {
+        "block_hash": "41wD6WvHmEwa9QqDUvC2PxwMo2jQAgTxnfRTeUPdHMVG",
+        "id": "FWurPbSZHyizZRZovCsCxNp7jAm9CEuNKApadEKiQ47H",
+        "outcome": {
+          "executor_id": "tong-gas-d95rai.testnet",
+          "gas_burnt": 7524947687500,
+          "logs": [],
+          "metadata": {
+            "contracts": [
+              null,
+              null,
+              null
+            ],
+            "gas_profile": [],
+            "version": 4
+          },
+          "receipt_ids": [
+            "HrzNcnopvP7NwqwbFgDwR7CK3X8nCJ4D449UkURFVTS6"
+          ],
+          "status": {
+            "SuccessValue": ""
+          },
+          "tokens_burnt": "7032494768750000000000"
+        },
+        "proof": [
+          {
+            "direction": "Left",
+            "hash": "4JbHreMBjbiMXYNkdmQrt8kxJjj6MBGpNyH8pLwBhXr3"
+          },
+          {
+            "direction": "Right",
+            "hash": "ENe8P5ZXsnm2eP7kjku5cARfNVv5K7qWoiV4ibwfFj6n"
+          }
+        ]
+      }
+    ],
+    "status": {
+      "SuccessValue": ""
+    },
+    "transaction": {
+      "actions": [
+        "CreateAccount",
+        {
+          "Transfer": {
+            "deposit": "10000000000000000000000000"
+          }
+        },
+        {
+          "AddKey": {
+            "access_key": {
+              "nonce": 0,
+              "permission": "FullAccess"
+            },
+            "public_key": "ed25519:ADfCN5KbrDt5EHdwoyURqdXT59oCswec7AX8wwKZDS4Y"
+          }
+        }
+      ],
+      "hash": "3sQmsTGYgtDAxvkz56uVMr4vJcU4S2WsiJrh4Cjr69Yf",
+      "nonce": 51910618664932,
+      "priority_fee": 0,
+      "public_key": "ed25519:9TGpXUX6VFKKFsXHb3tEAG1az1MuU9jkN7Z2EqVCfqJQ",
+      "receiver_id": "tong-gas-d95rai.testnet",
+      "signature": "ed25519:MGc431AjGc28V7x2Ler46CntW98SLrP8QiQehE1r4ez9kNAPzXJH5QTE3No1d2FrPkjocVyoUfq26vPMoA5Y5nN",
+      "signer_id": "testnet"
+    },
+    "transaction_outcome": {
+      "block_hash": "xq1Z8FC8An3VAde37D2Kquio7XN5kByGmCKxGMo5eri",
+      "id": "3sQmsTGYgtDAxvkz56uVMr4vJcU4S2WsiJrh4Cjr69Yf",
+      "outcome": {
+        "executor_id": "testnet",
+        "gas_burnt": 824947687500,
+        "logs": [],
+        "metadata": {
+          "gas_profile": null,
+          "version": 1
+        },
+        "receipt_ids": [
+          "FWurPbSZHyizZRZovCsCxNp7jAm9CEuNKApadEKiQ47H"
+        ],
+        "status": {
+          "SuccessReceiptId": "FWurPbSZHyizZRZovCsCxNp7jAm9CEuNKApadEKiQ47H"
+        },
+        "tokens_burnt": "82494768750000000000"
+      },
+      "proof": [
+        {
+          "direction": "Right",
+          "hash": "7jViyb9hs9dA59RxpSpvKLF2kT6Xo3Gq3VgW7q65WuZ7"
+        },
+        {
+          "direction": "Right",
+          "hash": "HBQuc6bdF4iKdzLpwkC1aAZEKBkASHMrGhWnqETVLq9L"
+        },
+        {
+          "direction": "Right",
+          "hash": "8HqEE5oQ36cgo2ha2uR4dVzxxkKwsEDJsUJtRcEVJtgb"
+        }
+      ]
+    }
+  }
+}

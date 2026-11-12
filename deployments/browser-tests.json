@@ -1,0 +1,18 @@
+{
+  "at": "2026-11-12T07:58:09.338Z",
+  "network": "testnet",
+  "checks": [
+    "prior live browser note and MPC calls are recorded in relayer-transactions.jsonl",
+    "playground 1440px has no overflow",
+    "documentation 1440px has no overflow",
+    "playground 375px has no overflow",
+    "documentation 375px has no overflow",
+    "documentation deep link resolves to docs",
+    "proof navigation returns from docs to playground",
+    "UI fetches a real 1Click dry quote",
+    "missing wallet displays recovery guidance",
+    "temporary wallet is explicitly labeled and awaits a signed link request"
+  ],
+  "passed": 10,
+  "errors": []
+}

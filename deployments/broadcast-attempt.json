@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-12T07:52:58.094Z",
+  "chain_id": 11155111,
+  "derived_address": "0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8",
+  "balance_wei": "0",
+  "required_wei": "1344000",
+  "nonce": "0",
+  "status": "BLOCKED",
+  "reason": "Insufficient Sepolia test ETH for the saved signed transaction."
+}

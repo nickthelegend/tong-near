@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-12T07:53:55.598Z",
+  "passed": 5,
+  "checks": [
+    "all five scoped tools exposed over real stdio MCP transport",
+    "MCP identity reads deployed factory",
+    "MCP prepares correct live nonce without signing or spending",
+    "MCP rejects invalid signature",
+    "MCP derives child-owned Sepolia address"
+  ]
+}

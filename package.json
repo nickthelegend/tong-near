@@ -7,20 +7,25 @@
   "packageManager": "pnpm@10.29.2",
   "scripts": {
     "build:contract": "bash scripts/build-contract.sh",
-    "build": "pnpm --filter @tong/web build",
+    "build": "node scripts/sync-evidence.mjs && pnpm --filter @tong/web build",
     "test": "node --test tests/*.test.mjs",
     "test:sandbox": "bash scripts/test-sandbox.sh",
     "dev": "pnpm --filter @tong/web dev",
-    "relayer": "node packages/relayer/src/index.mjs",
+    "relayer": "node --env-file-if-exists=.env packages/relayer/src/index.mjs",
     "mcp": "node packages/mcp/src/index.mjs",
     "deploy:testnet": "node scripts/deploy-testnet.mjs",
-    "demo:testnet": "node scripts/demo-testnet.mjs"
+    "demo:testnet": "node scripts/demo-testnet.mjs",
+    "test:mcp": "node scripts/test-mcp.mjs",
+    "test:browser": "node scripts/browser-test.mjs",
+    "verify:testnet": "node scripts/verify-deployment.mjs"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "1.25.3",
     "@noble/curves": "1.9.7",
     "bs58": "6.0.0",
     "ethers": "6.15.0",
     "near-api-js": "7.0.2",
-    "playwright": "1.58.2"
+    "playwright": "1.58.2",
+    "prettier": "3.6.2"
   }
 }

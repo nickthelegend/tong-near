@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-12T07:59:11.698Z",
+  "passed": 5,
+  "checks": [
+    "invalid signature rejected before gas budget reservation",
+    "current relayer policy sponsors a real signed note",
+    "0.1 test NEAR gas reserve persisted before submission",
+    "replay rejected without another budget reservation",
+    "live child read-back matches signed data"
+  ]
+}

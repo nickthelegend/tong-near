@@ -1,0 +1,22 @@
+{
+  "at": "2026-11-12T08:00:17.678Z",
+  "network": "testnet",
+  "passed": 15,
+  "checks": [
+    "final transaction: create funded relayer",
+    "final transaction: deploy Tong factory",
+    "final transaction: initialize Tong factory",
+    "final transaction: evm: link",
+    "final transaction: evm: set_note",
+    "final transaction: solana: link",
+    "final transaction: solana: set_note",
+    "final transaction: evm: sign_sepolia",
+    "final transaction: lock factory: delete final full-access key",
+    "final transaction: fund relayer testnet gas reserve",
+    "live factory code hash matches local optimized WASM",
+    "locked factory has zero access keys",
+    "evm: identity ready, expected WASM, zero keys, signed note present",
+    "solana: identity ready, expected WASM, zero keys, signed note present",
+    "recorded MPC signature recovers to current derived address and exact Sepolia payload"
+  ]
+}

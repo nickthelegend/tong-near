@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-while [ "$(memory_pressure | tail -1 | tr -cd '0-9')" -lt 30 ]; do echo 'Waiting for memory'; sleep 15; done
+if command -v memory_pressure >/dev/null; then
+  while [ "$(memory_pressure | tail -1 | tr -cd '0-9')" -lt 30 ]; do echo 'Waiting for memory'; sleep 15; done
+fi
 VERSION=2.14.0-rc.4
 BIN="${NEAR_SANDBOX_BIN:-$PWD/.tools/near-sandbox}"
 if [ ! -x "$BIN" ]; then

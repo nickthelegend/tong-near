@@ -1,0 +1,20 @@
+{
+  "checked_at": "2026-11-12",
+  "chain": "ethereum-sepolia",
+  "status": "BLOCKED",
+  "derived_address": "0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8",
+  "findings": [
+    {
+      "url": "https://rpc.aurpay.net/docs/faucet",
+      "captcha": false,
+      "requirement": "Receiving address must hold at least 0.0001 ETH on Ethereum mainnet",
+      "result": "No claim made: newly derived address is unfunded; no mainnet funding authorized"
+    },
+    {
+      "url": "https://sepolia-faucet.pk910.de/",
+      "requirement": "Browser mining work; JavaScript required",
+      "result": "Not used; no mining session or anti-bot bypass attempted"
+    }
+  ],
+  "note": "These are checked provider requirements, not fabricated claim responses. broadcast-attempt.json records the actual Sepolia balance check."
+}
