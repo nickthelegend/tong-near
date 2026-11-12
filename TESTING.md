@@ -69,7 +69,7 @@ The full browser check uses the locally generated EVM demo key from `.near-crede
 
 `node scripts/browser-test.mjs --read-only` skips those already verified writes and checks 1440/375 playground and documentation layouts, a live dry quote, missing-wallet recovery, and temporary-wallet labeling. It writes [browser-tests.json](deployments/browser-tests.json). No real browser extension has been automated; actual wallet vendor compatibility still requires manual testing.
 
-Headless Chrome launches are protected by the shared `withChromeLock` helper. Every browser closes in `finally`. Screenshots are kept **outside the repo** at `/Volumes/Extreme SSD/Projects/grokbot/orchestration/shots/tong/`, including initial before, final after, connected and documentation views at 1440 and 375 px. `scripts/screenshots.mjs` and `scripts/browser-test.mjs` use that machine-specific shared path; change the path and lock import on another machine.
+Headless Chrome launches are protected by the shared `withChromeLock` helper. Every browser closes in `finally`. Screenshots are kept **outside the repo** at `tong`, including initial before, final after, connected and documentation views at 1440 and 375 px. `scripts/screenshots.mjs` and `scripts/browser-test.mjs` use that machine-specific shared path; change the path and lock import on another machine. Screenshots were captured locally during QA and are not committed.
 
 ## Manual wallet checks
 
