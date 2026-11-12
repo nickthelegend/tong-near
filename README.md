@@ -1,6 +1,6 @@
-# Tong 通
+# Tong 通 — EVM or Solana wallets on NEAR
 
-**Any wallet, any chain, one NEAR account.**
+**Your EVM or Solana wallet, acting on NEAR — plus Chain Signatures to Sepolia.**
 
 Tong lets an EVM or Solana wallet authorize a small set of NEAR actions without creating a NEAR key. A Rust factory verifies the foreign signature on chain, creates a deterministic keyless subaccount, and forwards only approved actions. That child can request a real NEAR Chain Signature for a bounded Sepolia transfer.
 
@@ -16,7 +16,22 @@ Built from scratch during NEAR HACKATHON, November 2026. Testnet only. MIT © 20
 - Vanilla connector, React hook, stdio MCP tools, a budgeted local relayer, and a responsive demo with integration docs.
 - Live 1Click **mainnet dry quote**. No deposit address is requested and no mainnet transaction is signed.
 
-The outbound transfer has **not been broadcast**: the newly derived Sepolia address has zero test ETH. A verified signed transaction is saved; see [BLOCKED.md](BLOCKED.md). “Any wallet, any chain” describes the product goal. This implementation supports injected EVM and Solana message signers, NEAR testnet, and outbound Sepolia native transfers. It does not yet implement WalletConnect mobile transport, arbitrary dApp function calls, wallet recovery or a production funding bridge.
+The outbound transfer has **not been broadcast**: the newly derived Sepolia address has zero test ETH. A verified signed transaction is saved; see [BLOCKED.md](BLOCKED.md). This implementation supports injected EVM and Solana message signers, NEAR testnet, and outbound Sepolia native transfers. It does not yet implement WalletConnect mobile transport, arbitrary dApp function calls, wallet recovery or a production funding bridge.
+
+Roadmap: “Any wallet, any chain” is a future goal, not the current support matrix.
+
+## How Tong differs
+
+EVM-wallet access to NEAR already exists. NEAR's [account documentation](https://docs.near.org/protocol/accounts-contracts/account-model#account-id) lists Ethereum-like accounts controlled by Ethereum wallets. The official [Ethereum wallets package](https://github.com/near/wallet-selector/blob/main/packages/ethereum-wallets/README.md) converts NEAR transaction inputs into Ethereum-compatible transactions. [NEP-518](https://github.com/near/NEPs/blob/master/neps/nep-0518.md#summary) specifies eth-implicit accounts and their wallet contract; those accounts are also created without access keys. Keylessness and EVM login alone are therefore not Tong's novelty.
+
+Tong implements a narrower combination, verified in this repository:
+
+- **Solana ed25519 authorization:** a canonical Tong message is checked by `env::ed25519_verify`, alongside the EVM verifier. See the [factory implementation](packages/contract/src/lib.rs) and [live ed25519 link receipt](https://testnet.nearblocks.io/txns/DwQhSgSoNqKCLAJcx1r4qujcXV4mGwjXexTr5ktXWTq5).
+- **One keyless policy child per wallet:** Tong deploys its own child at a hash-derived subaccount, controlled only by its locked factory. This is Tong's application policy, not the native eth-implicit account implementation. See the [factory](packages/contract/src/lib.rs), [child contract](packages/contract/account/src/lib.rs), and [recorded key lists](deployments/lock-proof.json).
+- **On-chain-built outbound EIP-155 transactions:** the child builds the bounded Sepolia RLP and hash before requesting Chain Signatures. It does not accept an opaque hash to sign. See the [payload builder](packages/contract/account/src/lib.rs) and [verified MPC evidence](deployments/chain-signature.json).
+- **Strict action allowlist:** only account linking, a bounded note and bounded Sepolia native-transfer signing are allowed. This sacrifices general-purpose dApp execution for a small policy surface. See the [factory's allowed actions](packages/contract/src/lib.rs) and [security limits](docs/SECURITY.md).
+
+These are implementation differences, not a claim that NEAR lacks ed25519 keys, policy contracts or Chain Signatures, nor a claim of a first-ever wallet connector. Real MetaMask and Phantom extension approvals remain manual checks.
 
 ## Inspect the live proof
 
