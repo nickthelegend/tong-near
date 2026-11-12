@@ -136,19 +136,47 @@ export function verifyAuthorization(request, signature) {
   }
 }
 export async function rpc(method, params, rpcUrl = TESTNET_RPC) {
-  const response = await fetch(rpcUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ jsonrpc: "2.0", id: "tong", method, params }),
-    signal: AbortSignal.timeout(20000),
-  });
-  if (!response.ok) throw new Error(`NEAR RPC HTTP ${response.status}`);
-  const body = await response.json();
-  if (body.error)
-    throw new Error(
-      body.error.data?.error_message ?? body.error.message ?? "NEAR RPC failed",
-    );
-  return body.result;
+  // Retrying a read is safe; never replay a broadcast after an ambiguous response.
+  const readOnly = ["query", "gas_price", "status", "tx", "block"].includes(
+    method,
+  );
+  for (let attempt = 0; ; attempt++) {
+    const response = await fetch(rpcUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: "tong", method, params }),
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!response.ok) {
+      const retry =
+        readOnly &&
+        attempt < 3 &&
+        [429, 502, 503, 504].includes(response.status);
+      const header = response.headers.get("Retry-After");
+      const seconds = header === null ? null : Number(header);
+      const delay =
+        header === null
+          ? 500 * 2 ** attempt
+          : Number.isFinite(seconds)
+            ? seconds * 1000
+            : Date.parse(header) - Date.now();
+      // Respect longer server backoffs by failing instead of retrying too early.
+      if (retry && Number.isFinite(delay) && delay <= 10000) {
+        await response.body?.cancel();
+        await new Promise((resolve) => setTimeout(resolve, Math.max(0, delay)));
+        continue;
+      }
+      throw new Error(`NEAR RPC HTTP ${response.status}`);
+    }
+    const body = await response.json();
+    if (body.error)
+      throw new Error(
+        body.error.data?.error_message ??
+          body.error.message ??
+          "NEAR RPC failed",
+      );
+    return body.result;
+  }
 }
 export async function view(
   contractId,
