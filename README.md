@@ -60,9 +60,25 @@ pnpm build
 pnpm dev
 ```
 
-Open `http://127.0.0.1:5370`. The documentation and recorded proof work without a relayer. Click **Connect with Tong** to select an injected EVM or Solana wallet. Missing extensions produce an error with installation guidance.
+Open `http://127.0.0.1:5310`. Read-only screens (landing, apps, permissions, developers, account reads) work without a relayer. **Connect your wallet** lists injected EVM wallets (EIP-6963 and `window.ethereum`) and Solana wallets (Phantom, Solflare, Backpack); missing ones show install links. Without Vite, `pnpm build && node scripts/serve-dist.mjs 5310 5311` serves the production build and proxies `/api`.
 
-To sponsor transactions, put a funded **testnet** relayer credential in a local, gitignored file with mode 0600. Its shape is `{ "account_id": "your-account.testnet", "secret_key": "<your own testnet secret>" }`. Set `TONG_RELAYER_KEY_FILE` to its path and run `pnpm relayer` in a second terminal. The relayer binds to `127.0.0.1:5371`; Vite proxies `/api`. No credentials are bundled or committed. The original local build already has its own gitignored credential file. Node loads an optional root `.env`; `.env.example` contains only public configuration and file paths.
+### Screens
+
+| Route | What it shows (all live data) |
+| --- | --- |
+| `#/` | Landing: hero with the connect widget, live facts (contract keys, last Tong transaction, sponsor use), how it works, security, FAQ |
+| `#/connect` | Connect: detected wallets, install links, temporary test wallet; then **Create your NEAR account** with the derived account ID and step tracker |
+| `#/app` | Account: NEAR identity, balance, access-key count, signed-action count, linked wallets, NEAR and derived Sepolia addresses, on-chain note, recent receipts |
+| `#/app/apps` | App directory: what works with your wallet today (Notes, Chain Signatures, live 1Click dry quote, NearBlocks) and the roadmap apps that need an app-call permission |
+| `#/app/act` | Act on NEAR: compose a note, preview the exact EIP-712 request (domain, action, data, nonce, deadline), sign, then read the note back |
+| `#/app/sign` | Cross-chain: build a capped Sepolia transfer from live nonce and gas, policy checks, MPC signature, recovered signer, broadcast or the honest unfunded state |
+| `#/app/activity` | Activity: NearBlocks v3 receipts for your account plus this session's not-yet-indexed transactions, with explorer links |
+| `#/app/permissions` | Permissions: allowed actions from `get_config`, child and factory key counts, signature lifetime, today's sponsorship meters |
+| `#/app/developers` | Developers: SDK, React, request schema and MCP snippets, live contract config, packages |
+
+Every route has a phone layout with a bottom tab bar (checked at 390 px, no horizontal overflow).
+
+To sponsor transactions, put a funded **testnet** relayer credential in a local, gitignored file with mode 0600. Its shape is `{ "account_id": "your-account.testnet", "secret_key": "<your own testnet secret>" }`. Set `TONG_RELAYER_KEY_FILE` to its path and run `pnpm relayer` in a second terminal. The relayer binds to `127.0.0.1:5311`; Vite (or `scripts/serve-dist.mjs`) proxies `/api`. No credentials are bundled or committed. The original local build already has its own gitignored credential file. Node loads an optional root `.env`; `.env.example` contains only public configuration and file paths.
 
 Try it:
 
@@ -71,7 +87,7 @@ Try it:
 3. Select **Sign a Sepolia test transaction**. Expect an MPC signature and a raw EIP-155 transaction for a zero-value self transfer. Signing alone does not broadcast it.
 4. Select **Get dry quote**. Expect a live 10 USDC Ethereum → NEAR quote clearly labeled mainnet and dry.
 
-**Use a temporary test wallet** generates a fresh EVM key in browser memory. It is explicitly a test wallet, disappears on reload and does not connect an existing wallet. Its link still needs a real signature and spends sponsored testnet funds. Do not send assets to that temporary identity.
+**Temporary test wallet** (on the connect screen) generates a fresh EVM key in browser memory. It is explicitly a test wallet, disappears on reload and does not connect an existing wallet. Its link still needs a real signature and spends sponsored testnet funds. Do not send assets to that temporary identity.
 
 The original demo was topped up with a separately recorded 8 test NEAR gas reserve (`node scripts/fund-relayer.mjs`). This does not raise its daily ceiling.
 
@@ -79,13 +95,13 @@ The relayer rejects invalid signatures and stale nonces before broadcasting, ser
 
 ## Integrate
 
-`@tong/sdk` is a workspace package, not published to npm. See the full examples in the demo's **Documentation** tab.
+`@tong/sdk` is a workspace package, not published to npm. See the full examples on the app's **Developers** screen.
 
 ```js
 import { TongConnector } from '@tong/sdk';
 const tong = new TongConnector({
   contractId: 'tong-d8l0q0.testnet',
-  relayerUrl: 'http://127.0.0.1:5371'
+  relayerUrl: 'http://127.0.0.1:5311'
 });
 await tong.connect('evm'); // or 'solana'
 await tong.link();
@@ -142,7 +158,7 @@ Scripts resume using their local credentials, so an already initialized factory 
 - `packages/sdk`: canonical protocol, injected wallet connector, React hook and Sepolia helpers.
 - `packages/relayer`: HTTP sponsorship with persisted spending reservations.
 - `packages/mcp`: stdio tools for agent integrations.
-- `packages/web`: pearl/coral playground, source documentation and public evidence.
+- `packages/web`: the Tong web app (landing, connect, account, apps, act, cross-chain, activity, permissions, developers).
 - `tests`: local cryptographic tests and real WASM sandbox adversarial cases.
 - `scripts`: builds, deployments, evidence verification and browser checks.
 

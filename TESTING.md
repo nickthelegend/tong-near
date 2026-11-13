@@ -59,7 +59,7 @@ The faucet account creation response is stored separately from transaction-call 
 
 ## Browser verification
 
-Start one web server (`pnpm dev`, port **5370**) and the local HTTP relayer (`pnpm relayer`, port **5371**). The relayer needs the gitignored local testnet key file. Then:
+Start one web server (`pnpm dev`, port **5310**) and the local HTTP relayer (`pnpm relayer`, port **5311**). The relayer needs the gitignored local testnet key file. Then:
 
 ```sh
 pnpm test:browser
