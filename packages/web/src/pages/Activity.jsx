@@ -147,7 +147,7 @@ export default function Activity() {
             <Skeleton h={18} w="70%" />
           </div>
         ) : all.length === 0 ? (
-          <Empty art="/art/3d/globe-nodes.webp" title="No activity yet">
+          <Empty art="/art/v2/empty.webp" title="No activity yet">
             Create your account or save a note and it shows up here with its NEAR receipt.
           </Empty>
         ) : (

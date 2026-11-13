@@ -2676,3 +2676,61 @@ input:focus {
     grid-template-columns: 1fr;
   }
 }
+
+/* editorial art (art-incoming v2) */
+.l-hero-art {
+  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.45));
+}
+.l-final {
+  text-align: left;
+  display: block;
+}
+.l-final-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 32px;
+  background: #ffe3d8;
+  border-radius: 32px;
+  overflow: hidden;
+  padding-left: 56px;
+}
+.l-final-card > div {
+  display: grid;
+  gap: 18px;
+  justify-items: start;
+  padding: 48px 0;
+}
+.l-final-card p {
+  color: #6f4c42;
+  font-size: 18px;
+}
+.l-final-card img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  display: block;
+}
+.l-final img {
+  width: 100%;
+}
+@media (max-width: 900px) {
+  .l-final-card {
+    grid-template-columns: 1fr;
+    padding-left: 0;
+  }
+  .l-final-card > div {
+    padding: 36px 24px 0;
+  }
+}
+@media (min-width: 901px) {
+  .l-final-card {
+    align-items: stretch;
+  }
+  .l-final-card img {
+    height: 100%;
+    min-height: 380px;
+    aspect-ratio: auto;
+  }
+}

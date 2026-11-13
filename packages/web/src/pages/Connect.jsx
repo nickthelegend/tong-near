@@ -223,7 +223,7 @@ export default function Connect() {
           </section>
         )}
         <aside className="c-pane c-side">
-          <img src={linked ? "/art/3d/links-linked.webp" : "/art/3d/links-unlinked.webp"} alt="" />
+          <img src={linked ? "/art/v2/two-keys.webp" : "/art/v2/plug-socket.webp"} alt="" />
           <h2>{linked ? "Linked." : "Your wallet, on NEAR."}</h2>
           <ul>
             <li>

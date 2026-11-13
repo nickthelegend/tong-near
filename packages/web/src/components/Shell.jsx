@@ -189,7 +189,7 @@ export function NeedWallet({ children }) {
   if (!tong.active)
     return (
       <div className="card need">
-        <img src="/art/3d/wallet.webp" alt="" width="120" height="120" />
+        <img src="/art/v2/wallet.webp" alt="" width="120" height="120" />
         <h2>Connect a wallet to continue</h2>
         <p>Tong works with the Ethereum or Solana wallet you already use.</p>
         <a className="btn btn-dark" href="#/connect">
@@ -200,7 +200,7 @@ export function NeedWallet({ children }) {
   if (tong.identity === null)
     return (
       <div className="card need">
-        <img src="/art/3d/links-unlinked.webp" alt="" width="120" height="120" />
+        <img src="/art/v2/empty.webp" alt="" width="120" height="120" />
         <h2>Create your NEAR account first</h2>
         <p>One signature from {walletLabel(tong.active)} creates it. The sponsor covers storage on testnet.</p>
         <a className="btn btn-dark" href="#/connect">

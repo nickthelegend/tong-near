@@ -223,7 +223,7 @@ export default function CrossChain() {
             </div>
           ) : (
             <div className="card empty-mini">
-              <img src="/art/3d/signature-pen.webp" alt="" width="84" height="84" />
+              <img src="/art/v2/signature-bridge.webp" alt="" width="84" height="84" />
               <p>Your signed Sepolia transactions appear here, with the signer recovered and checked.</p>
             </div>
           )}

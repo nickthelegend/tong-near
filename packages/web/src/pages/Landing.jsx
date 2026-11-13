@@ -98,7 +98,7 @@ export default function Landing() {
           </ul>
         </div>
         <div className="l-hero-stage">
-          <img className="l-hero-art" src="/art/3d/plug-and-socket.webp" alt="" />
+          <img className="l-hero-art" src="/art/v2/plug-socket.webp" alt="" />
           <div className="l-widget" aria-label="Tong connect preview">
             <div className="l-widget-head">
               <Logo small />
@@ -228,17 +228,17 @@ export default function Landing() {
               Find yours <ArrowUpRight size={15} />
             </a>
           </div>
-          <img src="/art/3d/links-linked.webp" alt="" loading="lazy" />
+          <img src="/art/v2/two-keys.webp" alt="" loading="lazy" />
         </article>
         <article className="bento bento-coral">
-          <img src="/art/3d/bridge.webp" alt="" loading="lazy" />
+          <img src="/art/v2/signature-bridge.webp" alt="" loading="lazy" />
           <h3>Reach Ethereum from NEAR</h3>
           <p>NEAR Chain Signatures signs from an address derived for your account.</p>
         </article>
         <article className="bento">
-          <img src="/art/3d/key-ring.webp" alt="" loading="lazy" />
-          <h3>Permissions you can read</h3>
-          <p>Three allowed actions, hard caps, five-minute expiry, one-time nonces.</p>
+          <img src="/art/v2/wallet.webp" alt="" loading="lazy" />
+          <h3>Your wallet stays yours</h3>
+          <p>Keys never leave MetaMask or Phantom. Tong only sees signatures, each for one capped action.</p>
         </article>
         <article className="bento bento-wide bento-ink">
           <div>
@@ -314,11 +314,16 @@ await tong.setNote('Hello, NEAR.')`}</code>
       </section>
 
       <section className="l-final">
-        <img src="/art/3d/globe-nodes.webp" alt="" loading="lazy" />
-        <h2>Your wallet already works here.</h2>
-        <a className="btn btn-coral btn-lg" href="#/connect">
-          Connect your wallet <ArrowRight size={18} />
-        </a>
+        <div className="l-final-card">
+          <div>
+            <h2>Your wallet already works here.</h2>
+            <p>MetaMask or Phantom in, a NEAR account out. One signature.</p>
+            <a className="btn btn-coral btn-lg" href="#/connect">
+              Connect your wallet <ArrowRight size={18} />
+            </a>
+          </div>
+          <img src="/art/v2/hero.jpg" alt="A pearl plug and a coral plug joined by one adapter" width="1400" height="933" />
+        </div>
       </section>
 
       <footer className="l-footer">

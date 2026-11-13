@@ -4,7 +4,7 @@
 
 Tong lets an EVM or Solana wallet authorize a small set of NEAR actions without creating a NEAR key. A Rust factory verifies the foreign signature on chain, creates a deterministic keyless subaccount, and forwards only approved actions. That child can request a real NEAR Chain Signature for a bounded Sepolia transfer.
 
-Built from scratch during NEAR HACKATHON, November 2026. Testnet only. MIT © 2026 Nivesh Gajengi. This is a prototype, not audited wallet infrastructure.
+Built from scratch during NEAR HACKATHON, November 2026. Art generated with ChatGPT. Testnet only. MIT © 2026 Nivesh Gajengi. This is a prototype, not audited wallet infrastructure.
 
 ## What works today
 
