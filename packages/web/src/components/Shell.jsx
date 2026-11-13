@@ -103,7 +103,7 @@ function AccountMenu() {
 export function Shell({ route, title, subtitle, actions, children }) {
   const tong = useTongApp();
   const [more, setMore] = useState(false);
-  const isActive = (to) => route === to || route.startsWith(to + "/");
+  const isActive = (to) => route === to || (to !== "#/app" && route.startsWith(to + "/"));
   return (
     <div className="shell">
       <aside className="side">
