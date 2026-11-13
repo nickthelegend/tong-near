@@ -2617,3 +2617,62 @@ input:focus {
     font-size: 15px;
   }
 }
+
+/* activity receipt drawer */
+.act-layout {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+.act-layout.with-drawer {
+  grid-template-columns: minmax(0, 1fr) 380px;
+}
+.tx-row {
+  cursor: pointer;
+}
+.tx-row:hover td,
+.tx-row.on td {
+  background: var(--pearl);
+}
+.drawer {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+  position: sticky;
+  top: 20px;
+  animation: rise 0.2s ease both;
+  min-width: 0;
+}
+.drawer .kv {
+  margin: 14px 0 18px;
+}
+.drawer-load {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 16px;
+}
+.drawer-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.drawer-status.ok {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.drawer-status.bad {
+  background: var(--bad-soft);
+  color: var(--bad);
+}
+@media (max-width: 1100px) {
+  .act-layout.with-drawer {
+    grid-template-columns: 1fr;
+  }
+}

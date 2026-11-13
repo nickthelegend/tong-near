@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Check, Globe2, KeyRound, PenLine, Radio, RefreshCw, X } from "lucide-react";
 import { useTongApp } from "../lib/tong.jsx";
-import { accountActivity, nearTx, sepoliaTx, short, timeAgo, nearAccount } from "../lib/chain.js";
+import { accountActivity, nearTx, sepoliaTx, short, shortAccount, timeAgo, nearAccount, txReceipt, formatNear } from "../lib/chain.js";
 import { NeedWallet } from "../components/Shell.jsx";
-import { Empty, Ext, Skeleton, Status, cx, ErrorNote } from "../components/ui.jsx";
+import { Empty, Ext, Skeleton, Status, cx, ErrorNote, Spinner } from "../components/ui.jsx";
 
 const ICON = { link: KeyRound, note: PenLine, signature: Globe2, broadcast: Radio, transfer: Check };
 const FILTERS = [
@@ -13,12 +13,94 @@ const FILTERS = [
   ["signature", "Signatures"],
 ];
 
+function Receipt({ row, onClose }) {
+  const [r, setR] = useState(null);
+  const [err, setErr] = useState(null);
+  useEffect(() => {
+    setR(null);
+    setErr(null);
+    txReceipt(row.hash).then(setR).catch((e) => setErr(e.message));
+  }, [row.hash]);
+  return (
+    <aside className="drawer" aria-label="Transaction receipt">
+      <div className="card-head">
+        <h3>{row.label}</h3>
+        <button type="button" className="icon-btn" onClick={onClose} aria-label="Close receipt">
+          <X size={16} />
+        </button>
+      </div>
+      <p className="mono small muted wrap">{row.hash}</p>
+      {err ? (
+        <ErrorNote>{err}</ErrorNote>
+      ) : !r ? (
+        <p className="muted drawer-load">
+          <Spinner /> Reading the receipt from NEAR RPC…
+        </p>
+      ) : (
+        <>
+          <div className={cx("drawer-status", r.ok ? "ok" : "bad")}>
+            {r.ok ? <Check size={16} /> : <X size={16} />} {r.ok ? "Final · success" : "Failed"} · {r.receipts} receipts
+          </div>
+          <dl className="kv">
+            <div>
+              <dt>Paid by</dt>
+              <dd className="mono">{r.signer}</dd>
+            </div>
+            <div>
+              <dt>Contract</dt>
+              <dd className="mono">
+                {r.receiver}.{r.method}()
+              </dd>
+            </div>
+            {r.event && (
+              <>
+                <div>
+                  <dt>Your wallet</dt>
+                  <dd className="mono">{short(r.event.wallet.replace(/^evm:|^solana:/, ""), 8, 6)}</dd>
+                </div>
+                <div>
+                  <dt>Acted as</dt>
+                  <dd className="mono">{shortAccount(r.event.account_id)}</dd>
+                </div>
+                <div>
+                  <dt>Action</dt>
+                  <dd className="mono">
+                    {r.event.action} · nonce {r.event.nonce}
+                  </dd>
+                </div>
+              </>
+            )}
+            <div>
+              <dt>Deposit</dt>
+              <dd>{formatNear(r.deposit, 3)} NEAR</dd>
+            </div>
+            <div>
+              <dt>Gas burnt</dt>
+              <dd>
+                {(Number(r.gas) / 1e12).toFixed(1)} Tgas · {formatNear(r.fee, 5)} NEAR
+              </dd>
+            </div>
+            <div>
+              <dt>Block</dt>
+              <dd className="mono">{short(r.block, 8, 6)}</dd>
+            </div>
+          </dl>
+          <a className="btn btn-dark btn-block" href={nearTx(row.hash)} target="_blank" rel="noreferrer">
+            Open on NearBlocks
+          </a>
+        </>
+      )}
+    </aside>
+  );
+}
+
 export default function Activity() {
   const tong = useTongApp();
   const id = tong.identity?.ready ? tong.identity.account_id : null;
   const [rows, setRows] = useState(undefined);
   const [err, setErr] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [open, setOpen] = useState(null);
   const load = useCallback(() => {
     if (!id) return;
     setErr(null);
@@ -54,6 +136,7 @@ export default function Activity() {
         </button>
       </div>
       {err && <ErrorNote>{err} Your session's own transactions are still listed.</ErrorNote>}
+      <div className={cx("act-layout", open && "with-drawer")}>
       <section className="card table-card">
         {rows === undefined ? (
           <div className="pad">
@@ -83,7 +166,7 @@ export default function Activity() {
                 const Icon = ICON[r.kind] ?? Check;
                 const sep = r.chain === "sepolia";
                 return (
-                  <tr key={r.hash}>
+                  <tr key={r.hash} className={cx("tx-row", open?.hash === r.hash && "on")} onClick={() => !sep && setOpen(r)}>
                     <td>
                       <span className="tx-act">
                         <span className={cx("act-ico", `act-${r.kind}`)}>
@@ -95,7 +178,9 @@ export default function Activity() {
                     <td>{r.ok ? r.pending ? <Status tone="warm">Indexing</Status> : <Status tone="ok">Success</Status> : <Status tone="bad"><X size={11} /> Failed</Status>}</td>
                     <td>{sep ? "Sepolia" : "NEAR testnet"}</td>
                     <td>
-                      <Ext href={sep ? sepoliaTx(r.hash) : nearTx(r.hash)}>{short(r.hash, 8, 6)}</Ext>
+                      <span onClick={(e) => e.stopPropagation()}>
+                        <Ext href={sep ? sepoliaTx(r.hash) : nearTx(r.hash)}>{short(r.hash, 8, 6)}</Ext>
+                      </span>
                     </td>
                     <td className="r muted">{timeAgo(r.at)}</td>
                   </tr>
@@ -105,6 +190,8 @@ export default function Activity() {
           </table>
         )}
       </section>
+      {open && <Receipt row={open} onClose={() => setOpen(null)} />}
+      </div>
       {id && (
         <p className="muted small center">
           Indexed by NearBlocks for <Ext href={nearAccount(id)}>{short(id, 8, 22)}</Ext>

@@ -150,3 +150,35 @@ export async function relayerHealth() {
   if (!r.ok) throw new Error("Relayer offline");
   return r.json();
 }
+
+/* Full receipt of a Tong transaction, straight from NEAR RPC (the relayer is always the signer). */
+export async function txReceipt(hash) {
+  const r = await rpc("tx", { tx_hash: hash, sender_account_id: DEPLOYMENT.relayer_id, wait_until: "FINAL" });
+  const outcomes = [r.transaction_outcome, ...r.receipts_outcome];
+  const gas = outcomes.reduce((n, o) => n + BigInt(o.outcome.gas_burnt), 0n);
+  const fee = outcomes.reduce((n, o) => n + BigInt(o.outcome.tokens_burnt), 0n);
+  const logs = r.receipts_outcome.flatMap((o) => o.outcome.logs);
+  let event = null;
+  for (const l of logs) {
+    try {
+      const j = JSON.parse(l);
+      if (j.standard === "tong") event = j.data?.[0] ?? null;
+    } catch {
+      /* non-JSON log */
+    }
+  }
+  const failed = !!r.status?.Failure || r.receipts_outcome.some((o) => o.outcome.status?.Failure);
+  return {
+    ok: !failed,
+    signer: r.transaction.signer_id,
+    receiver: r.transaction.receiver_id,
+    method: r.transaction.actions?.[0]?.FunctionCall?.method_name ?? "—",
+    deposit: r.transaction.actions?.[0]?.FunctionCall?.deposit ?? "0",
+    block: r.transaction_outcome.block_hash,
+    receipts: r.receipts_outcome.length,
+    executors: [...new Set(r.receipts_outcome.map((o) => o.outcome.executor_id))],
+    gas,
+    fee,
+    event,
+  };
+}
