@@ -1,0 +1,152 @@
+import { rpc, view, TESTNET_RPC } from "@tong/sdk";
+import deployment from "../../../../deployments/testnet.json";
+
+export const CONTRACT_ID = deployment.contract_id;
+export const DEPLOYMENT = deployment;
+export const SEPOLIA_RPC = "https://ethereum-sepolia-rpc.publicnode.com";
+export const NEARBLOCKS_API = "https://api-testnet.nearblocks.io/v3";
+
+export const nearTx = (hash) => `https://testnet.nearblocks.io/txns/${hash}`;
+export const nearAccount = (id) => `https://testnet.nearblocks.io/address/${id}`;
+export const sepoliaAddress = (a) => `https://sepolia.etherscan.io/address/${a}`;
+export const sepoliaTx = (h) => `https://sepolia.etherscan.io/tx/${h}`;
+
+export const short = (v, head = 6, tail = 4) =>
+  v ? (v.length <= head + tail + 1 ? v : `${v.slice(0, head)}…${v.slice(-tail)}`) : "—";
+
+export function shortAccount(id) {
+  if (!id) return "—";
+  const [hash, ...rest] = id.split(".");
+  return hash.length > 16 ? `${hash.slice(0, 6)}…${hash.slice(-4)}.${rest.join(".")}` : id;
+}
+
+export function walletLabel(wallet) {
+  if (!wallet) return "—";
+  if (wallet.startsWith("evm:")) return short(wallet.slice(4), 6, 4);
+  return short(wallet.slice(7), 6, 4);
+}
+export const walletKind = (w) => (w?.startsWith("solana:") ? "solana" : "evm");
+
+const YOCTO = 10n ** 24n;
+export function formatNear(yocto, digits = 4) {
+  if (yocto === null || yocto === undefined) return "—";
+  const v = BigInt(yocto);
+  const whole = v / YOCTO;
+  const frac = (v % YOCTO).toString().padStart(24, "0").slice(0, digits).replace(/0+$/, "");
+  return `${whole.toLocaleString("en-US")}${frac ? "." + frac : ""}`;
+}
+export function formatEth(wei, digits = 6) {
+  if (wei === null || wei === undefined) return "—";
+  const v = BigInt(wei);
+  const base = 10n ** 18n;
+  const whole = v / base;
+  const frac = (v % base).toString().padStart(18, "0").slice(0, digits).replace(/0+$/, "");
+  return `${whole}${frac ? "." + frac : ""}`;
+}
+export function formatGwei(wei) {
+  const v = Number(BigInt(wei)) / 1e9;
+  if (v >= 1) return `${v.toLocaleString("en-US", { maximumFractionDigits: 2 })} gwei`;
+  return `${Number(BigInt(wei)).toLocaleString("en-US")} wei`;
+}
+export function timeAgo(ms) {
+  const s = Math.max(0, Math.round((Date.now() - ms) / 1000));
+  if (s < 60) return `${s}s ago`;
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 48) return `${h} h ago`;
+  return new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+export async function viewAccount(id) {
+  try {
+    return await rpc("query", { request_type: "view_account", finality: "final", account_id: id });
+  } catch (e) {
+    if (/does not exist|UNKNOWN_ACCOUNT/i.test(e.message)) return null;
+    throw e;
+  }
+}
+export async function accessKeys(id) {
+  const r = await rpc("query", { request_type: "view_access_key_list", finality: "final", account_id: id });
+  return r.keys ?? [];
+}
+export const getConfig = () => view(CONTRACT_ID, "get_config");
+export const getIdentity = (wallet) => view(CONTRACT_ID, "get_identity", { wallet });
+export const deriveAccount = (wallet) => view(CONTRACT_ID, "derive_account", { wallet });
+export const childState = (id) => view(id, "get_state");
+export async function nearGasPrice() {
+  return (await rpc("gas_price", [null])).gas_price;
+}
+export { TESTNET_RPC };
+
+export async function sepolia(method, params = []) {
+  const r = await fetch(SEPOLIA_RPC, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+    signal: AbortSignal.timeout(20000),
+  });
+  if (!r.ok) throw new Error(`Sepolia RPC HTTP ${r.status}`);
+  const b = await r.json();
+  if (b.error) throw new Error(b.error.message);
+  return b.result;
+}
+export async function sepoliaSnapshot(address) {
+  const [chainId, balance, nonce, gasPrice] = await Promise.all([
+    sepolia("eth_chainId"),
+    sepolia("eth_getBalance", [address, "latest"]),
+    sepolia("eth_getTransactionCount", [address, "pending"]),
+    sepolia("eth_gasPrice"),
+  ]);
+  if (BigInt(chainId) !== 11155111n) throw new Error("Sepolia RPC returned a different network");
+  return { balance: BigInt(balance), nonce: BigInt(nonce), gasPrice: BigInt(gasPrice) };
+}
+
+const METHOD_LABEL = {
+  new: "Account created",
+  set_note: "Note saved on NEAR",
+  sign_sepolia: "Chain Signature requested",
+  sign: "MPC signing request",
+};
+async function nearblocks(path) {
+  const r = await fetch(`${NEARBLOCKS_API}${path}`, { signal: AbortSignal.timeout(20000) });
+  if (r.status === 429) throw new Error("NearBlocks rate limit reached. Try again in a minute.");
+  if (!r.ok) throw new Error(`NearBlocks HTTP ${r.status}`);
+  return r.json();
+}
+export async function accountActivity(accountId) {
+  const body = await nearblocks(`/accounts/${accountId}/receipts?limit=50`);
+  const byTx = new Map();
+  for (const t of body.data ?? []) {
+    const hash = t.transaction_hash;
+    const methods = (t.actions ?? []).map((a) => a.method || a.action);
+    const at = Number(BigInt(t.block?.block_timestamp ?? t.included_in_block_timestamp) / 1_000_000n);
+    const prev = byTx.get(hash) ?? { hash, at, methods: [], ok: true, receipts: 0 };
+    prev.methods.push(...methods);
+    prev.at = Math.min(prev.at, at);
+    prev.receipts += 1;
+    if (t.outcome && t.outcome.status === false) prev.ok = false;
+    byTx.set(hash, prev);
+  }
+  return [...byTx.values()]
+    .map((t) => {
+      const key = ["new", "sign_sepolia", "set_note", "sign"].find((m) => t.methods.includes(m));
+      const kind = key === "new" ? "link" : key === "set_note" ? "note" : key ? "signature" : "transfer";
+      return { ...t, kind, label: METHOD_LABEL[key] ?? "Account receipt" };
+    })
+    .sort((a, b) => b.at - a.at);
+}
+export async function factoryLatest() {
+  const body = await nearblocks(`/accounts/${CONTRACT_ID}/txns?limit=25`);
+  return (body.data ?? []).map((t) => ({
+    hash: t.transaction_hash,
+    at: Number(BigInt(t.block_timestamp) / 1_000_000n),
+    ok: t.outcomes?.status !== false,
+    deposit: t.actions_agg?.deposit ?? "0",
+  }));
+}
+export async function relayerHealth() {
+  const r = await fetch("/api/health", { signal: AbortSignal.timeout(8000) });
+  if (!r.ok) throw new Error("Relayer offline");
+  return r.json();
+}

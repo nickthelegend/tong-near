@@ -21,13 +21,13 @@ const account = new Account(
   new JsonRpcProvider({ url: rpcUrl }),
   new KeyPairSigner(KeyPair.fromString(c.secret_key)),
 );
-const port = Number(process.env.PORT ?? 5371);
+const port = Number(process.env.PORT ?? 5311);
 if (port < 5300 || port > 5999) throw new Error("Use a port in 5300–5999");
 const budget = new Budget(
   process.env.TONG_BUDGET_FILE ?? ".demo/relayer-budget.json",
 );
 const origins = (
-  process.env.TONG_ORIGINS ?? "http://127.0.0.1:5370,http://localhost:5370"
+  process.env.TONG_ORIGINS ?? "http://127.0.0.1:5310,http://localhost:5310"
 ).split(",");
 await mkdir("deployments", { recursive: true });
 const record = (entry) =>
@@ -66,6 +66,8 @@ const server = createServer(async (req, res) => {
       sponsorship: "bounded",
       dailyMaxCalls: 40,
       dailyMaxNear: "4",
+      relayerId: account.accountId,
+      budget: await budget.status().catch(() => null),
     });
     return;
   }

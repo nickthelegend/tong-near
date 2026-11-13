@@ -20,6 +20,23 @@ export class Budget {
   constructor(file, { maxCost = 4n * 10n ** 24n, maxCalls = 40 } = {}) {
     Object.assign(this, { file, maxCost, maxCalls });
   }
+  async status() {
+    const day = new Date().toISOString().slice(0, 10);
+    let state;
+    try {
+      state = JSON.parse(await readFile(this.file, "utf8"));
+    } catch (e) {
+      if (e.code !== "ENOENT") throw new Error("Budget ledger unreadable");
+    }
+    if (!state || state.day !== day) state = { day, calls: 0, reserved: "0" };
+    return {
+      day,
+      calls: state.calls,
+      maxCalls: this.maxCalls,
+      reserved: state.reserved,
+      maxReserved: String(this.maxCost),
+    };
+  }
   async reserve(deposit) {
     await mkdir(dirname(this.file), { recursive: true });
     let lock;
