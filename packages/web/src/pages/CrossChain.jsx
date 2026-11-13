@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ArrowDown, Check, Copy, ExternalLink, Globe2, Radio, X } from "lucide-react";
 import { parseEther, isAddress } from "ethers";
 import { useTongApp } from "../lib/tong.jsx";
-import { formatEth, formatGwei, nearTx, sepoliaAddress, sepoliaTx, short, shortAccount, sepoliaSnapshot } from "../lib/chain.js";
+import { formatEth, formatGwei, formatWeiSmart, nearTx, sepoliaAddress, sepoliaTx, short, shortAccount, sepoliaSnapshot } from "../lib/chain.js";
 import { NeedWallet } from "../components/Shell.jsx";
 import { EthMark, NearMark, Spinner, Steps, ErrorNote, CopyButton, cx } from "../components/ui.jsx";
 
@@ -213,8 +213,8 @@ export default function CrossChain() {
                 <div className="unfunded">
                   <b>Needs Sepolia test ETH to broadcast</b>
                   <p>
-                    Gas for this transaction is {formatEth(latest.maxCostWei, 12)} ETH. The address holds{" "}
-                    {snap?.balance !== undefined ? formatEth(snap.balance, 12) : "…"} ETH. Fund{" "}
+                    This transaction can spend up to {formatWeiSmart(latest.maxCostWei)} of Sepolia test ETH for gas. The address holds{" "}
+                    {snap?.balance !== undefined ? formatWeiSmart(snap.balance) : "…"}. Fund{" "}
                     <span className="mono">{short(latest.from, 6, 4)}</span> and broadcast here.
                   </p>
                 </div>

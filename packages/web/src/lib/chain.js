@@ -43,6 +43,12 @@ export function formatEth(wei, digits = 6) {
   const frac = (v % base).toString().padStart(18, "0").slice(0, digits).replace(/0+$/, "");
   return `${whole}${frac ? "." + frac : ""}`;
 }
+export function formatWeiSmart(wei) {
+  const v = BigInt(wei);
+  if (v === 0n) return "0 ETH";
+  if (v < 10n ** 12n) return `${v.toLocaleString("en-US")} wei`;
+  return `${formatEth(v, 8)} ETH`;
+}
 export function formatGwei(wei) {
   const v = Number(BigInt(wei)) / 1e9;
   if (v >= 1) return `${v.toLocaleString("en-US", { maximumFractionDigits: 2 })} gwei`;

@@ -23,8 +23,16 @@ const account = new Account(
 );
 const port = Number(process.env.PORT ?? 5311);
 if (port < 5300 || port > 5999) throw new Error("Use a port in 5300–5999");
+// Daily sponsorship ceiling (testnet NEAR and calls); defaults 4 NEAR / 40 calls, hard-capped at 10 NEAR / 100 calls.
+const dailyMaxNear = Number(process.env.TONG_DAILY_MAX_NEAR ?? 4);
+const dailyMaxCalls = Number(process.env.TONG_DAILY_MAX_CALLS ?? 40);
+if (!(dailyMaxNear > 0 && dailyMaxNear <= 10 && Number.isInteger(dailyMaxNear)))
+  throw new Error("TONG_DAILY_MAX_NEAR must be an integer from 1 to 10");
+if (!(dailyMaxCalls > 0 && dailyMaxCalls <= 100 && Number.isInteger(dailyMaxCalls)))
+  throw new Error("TONG_DAILY_MAX_CALLS must be an integer from 1 to 100");
 const budget = new Budget(
   process.env.TONG_BUDGET_FILE ?? ".demo/relayer-budget.json",
+  { maxCost: BigInt(dailyMaxNear) * 10n ** 24n, maxCalls: dailyMaxCalls },
 );
 const origins = (
   process.env.TONG_ORIGINS ?? "http://127.0.0.1:5310,http://localhost:5310"
@@ -64,8 +72,8 @@ const server = createServer(async (req, res) => {
       network: "testnet",
       contractId: config.contract_id,
       sponsorship: "bounded",
-      dailyMaxCalls: 40,
-      dailyMaxNear: "4",
+      dailyMaxCalls,
+      dailyMaxNear: String(dailyMaxNear),
       relayerId: account.accountId,
       budget: await budget.status().catch(() => null),
     });
