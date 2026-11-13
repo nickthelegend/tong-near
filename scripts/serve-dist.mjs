@@ -19,8 +19,9 @@ createServer(async (req, res) => {
   }
   const path = normalize(decodeURIComponent(req.url.split("?")[0])).replace(/^(\.\.[/\\])+/, "");
   try {
-    const body = await readFile(join(root, path === "/" ? "index.html" : path));
-    res.writeHead(200, { "content-type": types[extname(path)] ?? "application/octet-stream" });
+    const file = join(root, path === "/" ? "index.html" : path);
+    const body = await readFile(file);
+    res.writeHead(200, { "content-type": types[extname(file)] ?? "application/octet-stream" });
     res.end(body);
   } catch {
     res.writeHead(404);
