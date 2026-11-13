@@ -2,6 +2,9 @@
 
 ## Sepolia broadcast — BLOCKED
 
+Nov 13 recheck: `eth_getBalance(0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8)` returned **0 wei**. The film therefore shows the signed-not-broadcast state; the app's cross-chain screen broadcasts automatically once the derived address is funded.
+
+
 The saved MPC signature recovers to `0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8`. R3 revalidated it against a live Sepolia block: **25 wei base fee**, **50 wei at 2× base fee**, versus the saved **64 wei/gas**. The saved transaction was not underpriced, so the conditional fresh MPC request was not needed. This is reuse of the existing signature, not a claim of a new MPC response. The original [chain-signature.json](deployments/chain-signature.json) is unchanged; the separate [R3 signed-transaction evidence](deployments/chain-signature-r3-2026-11-12.json) records the fee check and recovered signer.
 
 The follow-up preflight at **11:30 UTC** found a **16-wei base fee** (2× = 32 wei), so the same 64-wei signature remains adequately priced at that check. No replacement signature was required.

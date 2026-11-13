@@ -1,3 +1,24 @@
+# Tong flow QA — November 13, 2026 (multi-screen rebuild + film v5)
+
+New web app (hash routes `#/`, `#/connect`, `#/app`, `#/app/apps`, `#/app/act`, `#/app/sign`, `#/app/activity`,
+`#/app/permissions`, `#/app/developers`). Screens and scores: [UI-JUDGE.md](UI-JUDGE.md).
+
+| Check | Result |
+| --- | --- |
+| Unit tests | `pnpm test`: 11 passed, 0 failed |
+| Web build | `pnpm --filter @tong/web build` passes |
+| Overflow | 20 captures (10 routes × 1440/390): 0 px horizontal overflow (`scripts/ui-shots.mjs`) |
+| Live flow, rehearsal (linked demo wallet) | note `2qE6GB2vnPh42Hd29FYA7kgya6cPuPioCa9oCCvfSdW1`, Chain Signature `77HEpGsVUZ2yqtaDbzX1qQkqyV1AiSkdhyFXyrsz4hhG` |
+| Live flow, film takes (fresh wallets, account created live each time) | take 1: `CZhN8WNzSDEqQJa6KUTbdGgtHLGqkfRpASamPTpbtBfi`, `HrQZEmAHtNMQ5tMqQLM2z7AmNP2YqRCas2h8sBwThUEt`, `3mEBkVG2VrgXyXqpFYXBsZsuugTeckiBKYAeu1CoSoUB`; take 2: `8hnY8KzLUBUHqBSY5xdKLkYBfYq1CsZ6MpUf9xskUAUc`, `9iMZYsKXdgLFoMzcw1SCXrPDMjwdoEKRNgmB1TSxxM3e`, `HXcMhFom32o8ELsbnXHNvwVgpsKCDtZzN3byhzns1w5m`; take 3 (final film): `HH2zUP7mw7NN8AWyiJfQxmkdbWJvPnZrrRMXjsBWbWUX`, `8fW4k245AqJDohu7xB3GbxpWqwdswerL3XRFvAkWTZUx`, `4XoQ7uHDeQSdTbF9ZxV7Zet3gcDSNM8fBjWWnfcofzhJ` |
+| Signed Sepolia transactions | each recovered to its account's derived address; all derived addresses hold 0 Sepolia ETH, so none was broadcast |
+| Sepolia funding check | 0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8: `eth_getBalance` = 0x0 on Nov 13 (publicnode) |
+| Sponsor budget | three takes in one UTC day needed more than the default 4 test NEAR ceiling; the relayer was run with `TONG_DAILY_MAX_NEAR=8` for the recording (default stays 4). Relayer balance after: about 4.6 test NEAR |
+
+Wallet approvals in QA and the film come from a Playwright-injected EIP-6963 "QA test wallet" whose key stays in Node
+(`scripts/lib/qa-wallet.mjs`); this is not a MetaMask or Phantom extension approval.
+
+---
+
 # Tong R3 flow QA — November 12, 2026
 
 Start commit: `231db43`. Factory: `tong-d8l0q0.testnet`, unchanged and locked. Scope: targeted documentation, copy and broadcast-preparation fixes. No contract deployment or key deletion.
