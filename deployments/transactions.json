@@ -4633,5 +4633,136 @@
         ]
       }
     }
+  },
+  {
+    "label": "v2: lock factory (delete final full-access key)",
+    "at": "2026-11-14T10:22:43.152Z",
+    "txHash": "H6cmi5CALSeEFywLVwPeSBQY9QJ2rocPbSnsWJNWMa12",
+    "explorer": "https://testnet.nearblocks.io/txns/H6cmi5CALSeEFywLVwPeSBQY9QJ2rocPbSnsWJNWMa12",
+    "ok": true,
+    "result": null,
+    "failure": null,
+    "outcome": {
+      "final_execution_status": "FINAL",
+      "receipts_outcome": [
+        {
+          "block_hash": "GpP7f7An54dYqn8jezs8NJBEBuEUEAhSagNjTUMQZpeB",
+          "id": "2vMMAZBAbkXUr94kJdnJ4uJvUeYxxFpnfxqSjCnx6Q2T",
+          "outcome": {
+            "executor_id": "tongid.testnet",
+            "gas_burnt": 203006125000,
+            "logs": [],
+            "metadata": {
+              "contracts": [
+                {
+                  "local": "EDcGAY5Z2smipWZLv3a3KGNrUwcuoBFriTv3sDac6PzJ"
+                }
+              ],
+              "gas_profile": [],
+              "version": 4
+            },
+            "receipt_ids": [
+              "HsxpJfN2os6FzyznsCDein26c9VkEJpVwcife8aZDrL1"
+            ],
+            "status": {
+              "SuccessValue": ""
+            },
+            "tokens_burnt": "20300612500000000000"
+          },
+          "proof": [
+            {
+              "direction": "Left",
+              "hash": "9W2xPZ3YvXG1nq6NG3k8Xec6ttZkZecZvT9NUmHXLTpm"
+            },
+            {
+              "direction": "Right",
+              "hash": "2zTUarr7yA9QxnBrvmbzshBRGcZ6qTsqs5inMWEsBPha"
+            }
+          ]
+        },
+        {
+          "block_hash": "8ShKLfAwMJ6xncKmaaMSxgxVW52rjFnZ4LhvxnhfHydw",
+          "id": "HsxpJfN2os6FzyznsCDein26c9VkEJpVwcife8aZDrL1",
+          "outcome": {
+            "executor_id": "tongid.testnet",
+            "gas_burnt": 223182562500,
+            "logs": [],
+            "metadata": {
+              "contracts": [
+                {
+                  "local": "EDcGAY5Z2smipWZLv3a3KGNrUwcuoBFriTv3sDac6PzJ"
+                }
+              ],
+              "gas_profile": [],
+              "version": 4
+            },
+            "receipt_ids": [],
+            "status": {
+              "SuccessValue": ""
+            },
+            "tokens_burnt": "0"
+          },
+          "proof": [
+            {
+              "direction": "Left",
+              "hash": "DNDBwwDm1x7T6oamNVavHVoM4dJbgfXkgEtojS5V1qDe"
+            },
+            {
+              "direction": "Left",
+              "hash": "2XcixjxnhAxHLoTchofYcAgbmbtNpBjhP9rdU1QMxPNS"
+            }
+          ]
+        }
+      ],
+      "status": {
+        "SuccessValue": ""
+      },
+      "transaction": {
+        "actions": [
+          {
+            "DeleteKey": {
+              "public_key": "ed25519:AoSY8xDSmNrjfmi4m81KXMZsYx2CAMNC17N46LvDTjn8"
+            }
+          }
+        ],
+        "hash": "H6cmi5CALSeEFywLVwPeSBQY9QJ2rocPbSnsWJNWMa12",
+        "nonce": 277639446000003,
+        "priority_fee": 0,
+        "public_key": "ed25519:AoSY8xDSmNrjfmi4m81KXMZsYx2CAMNC17N46LvDTjn8",
+        "receiver_id": "tongid.testnet",
+        "signature": "ed25519:qxZdfiEEUzPhzHiD26C4XSR7cghxsSnJ3JajN1b7SntcttXhBP6wMjyV295s26zfMQj3pxGgvTxifxWiWp4chab",
+        "signer_id": "tongid.testnet"
+      },
+      "transaction_outcome": {
+        "block_hash": "GpP7f7An54dYqn8jezs8NJBEBuEUEAhSagNjTUMQZpeB",
+        "id": "H6cmi5CALSeEFywLVwPeSBQY9QJ2rocPbSnsWJNWMa12",
+        "outcome": {
+          "executor_id": "tongid.testnet",
+          "gas_burnt": 203006125000,
+          "logs": [],
+          "metadata": {
+            "gas_profile": null,
+            "version": 1
+          },
+          "receipt_ids": [
+            "2vMMAZBAbkXUr94kJdnJ4uJvUeYxxFpnfxqSjCnx6Q2T"
+          ],
+          "status": {
+            "SuccessReceiptId": "2vMMAZBAbkXUr94kJdnJ4uJvUeYxxFpnfxqSjCnx6Q2T"
+          },
+          "tokens_burnt": "20300612500000000000"
+        },
+        "proof": [
+          {
+            "direction": "Right",
+            "hash": "3z6V4XsFUpbbxPSUNwcozC1LQMA6TYaCfnm19d1F3wDa"
+          },
+          {
+            "direction": "Right",
+            "hash": "2zTUarr7yA9QxnBrvmbzshBRGcZ6qTsqs5inMWEsBPha"
+          }
+        ]
+      }
+    }
   }
 ]
