@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-12T07:49:02.779Z",
+  "factory": "tong-d8l0q0.testnet",
+  "access_keys": [],
+  "code_hash": "9yxfa7UHw9F4vhq1HeMADZBmrugdTdofKoGVQPR8Rjio",
+  "children": {
+    "evm": {
+      "account_id": "dbeccc0e7914c5bf5c0af9f6b7ed469025f508e2.tong-d8l0q0.testnet",
+      "access_keys": 0
+    },
+    "solana": {
+      "account_id": "b36edcdd7fbba58661ade39d54cc4593b4472fc2.tong-d8l0q0.testnet",
+      "access_keys": 0
+    }
+  }
+}

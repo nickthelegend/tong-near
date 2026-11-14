@@ -1,0 +1,13 @@
+{
+  "network": "testnet",
+  "contract_id": "tong-d8l0q0.testnet",
+  "relayer_id": "relay.tong-d8l0q0.testnet",
+  "contract_sha256": "8574f61b32b63afc3de8d5d64f40cf29c93adc21cdd3bd78697f601fad1e2c90",
+  "account_contract_sha256": "7517fe2b0d34bb640e335f162515c4aa25724f130f1a06bab172880e0ba2528c",
+  "deployed_at": "2026-11-12T07:38:54.495Z",
+  "locked": true,
+  "mpc_contract": "v1.signer-prod.testnet",
+  "derivation_path": "tong:sepolia:11155111",
+  "locked_at": "2026-11-12T07:49:02.780Z",
+  "code_hash": "9yxfa7UHw9F4vhq1HeMADZBmrugdTdofKoGVQPR8Rjio"
+}

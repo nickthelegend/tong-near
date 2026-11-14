@@ -1,0 +1,84 @@
+{
+  "at": "2026-11-14T09:41:43.750Z",
+  "factory": "tongid.testnet",
+  "wallet": "evm:0xfd22eed5a4e449a81c4e17514ed11a7814ccd775",
+  "account_id": "rehearsal-7u589.tongid.testnet",
+  "wnear": "98750000000000000000000",
+  "sepolia": "0x62e8FDdEee0E7e98A8B039329117c047975A0e42",
+  "policy": {
+    "grants": [
+      {
+        "contract": "wrap.testnet",
+        "methods": [
+          "near_deposit",
+          "near_withdraw"
+        ],
+        "max_deposit": "200000000000000000000000",
+        "expires_at": "1797241269"
+      },
+      {
+        "contract": "guestbook.near-examples.testnet",
+        "methods": [
+          "add_message"
+        ],
+        "max_deposit": "0",
+        "expires_at": "1795254088"
+      }
+    ],
+    "send_cap": "100000000000000000000000",
+    "daily_cap": "300000000000000000000000",
+    "spent_today": "150000000000000000000000",
+    "day": "20771"
+  },
+  "steps": [
+    {
+      "label": "create named account",
+      "action": "link",
+      "ok": true,
+      "txHash": "A7maKkNgV6Rbys3Y1W43qfkP5i1Aop5EYK4DqEKRGBsz",
+      "reason": null
+    },
+    {
+      "label": "wrap 0.1 NEAR on wrap.testnet",
+      "action": "call",
+      "ok": true,
+      "txHash": "HLkyVk8D24BN1zaj9oM3TgPEbzxVaZpffitkqAHfzA2f",
+      "reason": null
+    },
+    {
+      "label": "wrap 0.5 NEAR (over the cap)",
+      "action": "call",
+      "ok": false,
+      "txHash": "CGc1uAArvQzQiJbqNzuf85Pdknpy4xxye6ZZgusC4pSV",
+      "reason": "policy: 0.5 NEAR is over the 0.2 NEAR per-call limit for wrap.testnet"
+    },
+    {
+      "label": "guestbook before any permission",
+      "action": "call",
+      "ok": false,
+      "txHash": "5MftM3q4GCfNtgPn3TusKpqKzE3M3MN2kpCYmCtN6LxZ",
+      "reason": "policy: no permission for guestbook.near-examples.testnet"
+    },
+    {
+      "label": "grant the NEAR guestbook",
+      "action": "grant",
+      "ok": true,
+      "txHash": "H8btJuxGAvxNR71d9CwRopTR7baXfcUPVBwKQG1YAVqJ",
+      "reason": null
+    },
+    {
+      "label": "sign the NEAR guestbook",
+      "action": "call",
+      "ok": true,
+      "txHash": "2wd1PhafVv16ggLgjQAy1wrTQ5bwQXQvkNPdjFWmfYjX",
+      "reason": null
+    },
+    {
+      "label": "send 0.05 NEAR",
+      "action": "send_near",
+      "ok": true,
+      "txHash": "5muqUPm6U7jrZrpLG4eVHpn1ghFGjR1LeBUsZoRGkTps",
+      "reason": null
+    }
+  ]
+}

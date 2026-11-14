@@ -1,0 +1,17 @@
+{
+  "network": "testnet",
+  "version": "2",
+  "contract_id": "tongid.testnet",
+  "relayer_id": "relay.tong-d8l0q0.testnet",
+  "contract_sha256": "c462c51f1fc930472624a1b5347e1123c7d71de9cd72f237445e6e7eecdf9fab",
+  "account_contract_sha256": "9da5c104beba6489d591e12a97bb5782f62990a5dfb6266fb1c8786dd642ec13",
+  "deployed_at": "2026-11-14T09:38:17.089Z",
+  "deploy_tx": {
+    "deploy": "DBDzGrsX3nZbXQ5zUfKsXjbxnfet5CU4FEhJg2arcnqQ",
+    "init": "77ZgbP1XCnQMgaMsACvtqahYxBotvTnfhFiD9P7guzSt"
+  },
+  "locked": false,
+  "mpc_contract": "v1.signer-prod.testnet",
+  "derivation_path": "tong:sepolia:11155111",
+  "previous": "deployments/v1/testnet.json"
+}

@@ -13,6 +13,8 @@ import { ed25519 } from "@noble/curves/ed25519";
 import bs58 from "bs58";
 
 export const TESTNET_RPC = "https://test.rpc.fastnear.com";
+// Public read fallback when FastNEAR rate-limits reads (never used to broadcast).
+export const TESTNET_READ_FALLBACK = "https://near-testnet.drpc.org";
 export const MPC_CONTRACT = "v1.signer-prod.testnet";
 export const DERIVATION_PATH = "tong:sepolia:11155111";
 // Deposit the relayer attaches per action. App deposits and NEAR transfers come from the user's own
@@ -184,7 +186,8 @@ export async function rpc(method, params, rpcUrl = TESTNET_RPC) {
     method,
   );
   for (let attempt = 0; ; attempt++) {
-    const response = await fetch(rpcUrl, {
+    const url = readOnly && attempt >= 2 && rpcUrl === TESTNET_RPC ? TESTNET_READ_FALLBACK : rpcUrl;
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ jsonrpc: "2.0", id: "tong", method, params }),
@@ -203,6 +206,12 @@ export async function rpc(method, params, rpcUrl = TESTNET_RPC) {
           : Number.isFinite(seconds)
             ? seconds * 1000
             : Date.parse(header) - Date.now();
+      // A long backoff on the primary: move straight to the read fallback.
+      if (retry && attempt < 2 && rpcUrl === TESTNET_RPC && !(Number.isFinite(delay) && delay <= 10000)) {
+        await response.body?.cancel();
+        attempt = 1;
+        continue;
+      }
       // Respect longer server backoffs by failing instead of retrying too early.
       if (retry && Number.isFinite(delay) && delay <= 10000) {
         await response.body?.cancel();

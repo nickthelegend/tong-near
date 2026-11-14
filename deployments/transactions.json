@@ -4001,5 +4001,637 @@
       }
     },
     "final_execution_status": "FINAL"
+  },
+  {
+    "label": "v2: deploy Tong factory",
+    "at": "2026-11-14T09:38:13.470Z",
+    "txHash": "DBDzGrsX3nZbXQ5zUfKsXjbxnfet5CU4FEhJg2arcnqQ",
+    "explorer": "https://testnet.nearblocks.io/txns/DBDzGrsX3nZbXQ5zUfKsXjbxnfet5CU4FEhJg2arcnqQ",
+    "ok": true,
+    "result": null,
+    "failure": null,
+    "outcome": {
+      "final_execution_status": "FINAL",
+      "receipts_outcome": [
+        {
+          "block_hash": "79AXPVwZECgC3PFr8are1LdAoGvtw4yq5S9N27j6iBQD",
+          "id": "GHVgmXssF82LLKcYt5F3TnBLFzBCKrAaodyEhmZ1Tz4N",
+          "outcome": {
+            "executor_id": "tongid.testnet",
+            "gas_burnt": 21674799623776,
+            "logs": [],
+            "metadata": {
+              "contracts": [
+                null
+              ],
+              "gas_profile": [],
+              "version": 4
+            },
+            "receipt_ids": [
+              "5YtUMUPW9huBsFeWzkJUecxJA3rxvvXitc9QwAgQjpb4"
+            ],
+            "status": {
+              "SuccessValue": ""
+            },
+            "tokens_burnt": "2167479962377600000000"
+          },
+          "proof": [
+            {
+              "direction": "Left",
+              "hash": "5ATx24gzdwXm4PnpvQKckKuebkMtH8DVjDxZHM4s4GJ4"
+            },
+            {
+              "direction": "Left",
+              "hash": "5rf7T1iGQzTBxBvbkyjk5jBbrq3jPtMipUGxo2AxLmtn"
+            },
+            {
+              "direction": "Right",
+              "hash": "CK5bN2gHSJGXPRJAbydwKrT2EqnLZrnHS31XVVcmPrGM"
+            }
+          ]
+        },
+        {
+          "block_hash": "CRcoA4aPQmtBWx2sqkybGSHmzHUqQN3S77Gb2jicP34e",
+          "id": "5YtUMUPW9huBsFeWzkJUecxJA3rxvvXitc9QwAgQjpb4",
+          "outcome": {
+            "executor_id": "tongid.testnet",
+            "gas_burnt": 223182562500,
+            "logs": [],
+            "metadata": {
+              "contracts": [
+                {
+                  "local": "EDcGAY5Z2smipWZLv3a3KGNrUwcuoBFriTv3sDac6PzJ"
+                }
+              ],
+              "gas_profile": [],
+              "version": 4
+            },
+            "receipt_ids": [],
+            "status": {
+              "SuccessValue": ""
+            },
+            "tokens_burnt": "0"
+          },
+          "proof": [
+            {
+              "direction": "Left",
+              "hash": "Jf7xcYkXEhEfBnJtZYfvn6DyQsFUMdAeTsEsqZs7gzm"
+            },
+            {
+              "direction": "Left",
+              "hash": "HLwFdBJLR1WpyKQsVTFewSe7kbywoMUrAWktVAzdwQgK"
+            }
+          ]
+        }
+      ],
+      "status": {
+        "SuccessValue": ""
+      },
+      "transaction": {
+        "actions": [
+          {
+            "DeployContract": {
+              "code": "xGLFHx/JMEcmJKG1NH4RI8fXHenNcvI3RF5ufuzfn6s="
+            }
+          }
+        ],
+        "hash": "DBDzGrsX3nZbXQ5zUfKsXjbxnfet5CU4FEhJg2arcnqQ",
+        "nonce": 277639446000001,
+        "priority_fee": 0,
+        "public_key": "ed25519:AoSY8xDSmNrjfmi4m81KXMZsYx2CAMNC17N46LvDTjn8",
+        "receiver_id": "tongid.testnet",
+        "signature": "ed25519:3Sz3aBgHtCUDGyuMKnWevzNL73ndncRW1d9bXocS1z7MJEotmuaK6hS4TTtm7S65AvnBsNRAKkpTiA2UmjpVeig5",
+        "signer_id": "tongid.testnet"
+      },
+      "transaction_outcome": {
+        "block_hash": "79AXPVwZECgC3PFr8are1LdAoGvtw4yq5S9N27j6iBQD",
+        "id": "DBDzGrsX3nZbXQ5zUfKsXjbxnfet5CU4FEhJg2arcnqQ",
+        "outcome": {
+          "executor_id": "tongid.testnet",
+          "gas_burnt": 2548806795871,
+          "logs": [],
+          "metadata": {
+            "gas_profile": null,
+            "version": 1
+          },
+          "receipt_ids": [
+            "GHVgmXssF82LLKcYt5F3TnBLFzBCKrAaodyEhmZ1Tz4N"
+          ],
+          "status": {
+            "SuccessReceiptId": "GHVgmXssF82LLKcYt5F3TnBLFzBCKrAaodyEhmZ1Tz4N"
+          },
+          "tokens_burnt": "254880679587100000000"
+        },
+        "proof": [
+          {
+            "direction": "Right",
+            "hash": "HKMaMV2Ymz1tKzCMCbU2Bri2U4yyHYvLnugMNpfxVbZc"
+          },
+          {
+            "direction": "Left",
+            "hash": "5rf7T1iGQzTBxBvbkyjk5jBbrq3jPtMipUGxo2AxLmtn"
+          },
+          {
+            "direction": "Right",
+            "hash": "CK5bN2gHSJGXPRJAbydwKrT2EqnLZrnHS31XVVcmPrGM"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "label": "v2: initialize Tong factory",
+    "at": "2026-11-14T09:38:16.906Z",
+    "txHash": "77ZgbP1XCnQMgaMsACvtqahYxBotvTnfhFiD9P7guzSt",
+    "explorer": "https://testnet.nearblocks.io/txns/77ZgbP1XCnQMgaMsACvtqahYxBotvTnfhFiD9P7guzSt",
+    "ok": true,
+    "result": null,
+    "failure": null,
+    "outcome": {
+      "final_execution_status": "FINAL",
+      "receipts_outcome": [
+        {
+          "block_hash": "6ZqGr6SXUxxpRpFHuWwsVF4mP4P75TYgV6WkNHs8oyXq",
+          "id": "EFM9jJ4oynqkn4R3y3Q3dpRsewxDNxqcCXGTahaLhjg8",
+          "outcome": {
+            "executor_id": "tongid.testnet",
+            "gas_burnt": 1431289499089,
+            "logs": [],
+            "metadata": {
+              "contracts": [
+                {
+                  "local": "EDcGAY5Z2smipWZLv3a3KGNrUwcuoBFriTv3sDac6PzJ"
+                }
+              ],
+              "gas_profile": [
+                {
+                  "cost": "BASE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "2382912999"
+                },
+                {
+                  "cost": "CONTRACT_LOADING_BASE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "35445963"
+                },
+                {
+                  "cost": "CONTRACT_LOADING_BYTES",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "360697164055"
+                },
+                {
+                  "cost": "READ_MEMORY_BASE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "7829589600"
+                },
+                {
+                  "cost": "READ_MEMORY_BYTE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "76026660"
+                },
+                {
+                  "cost": "READ_REGISTER_BASE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "5034330372"
+                },
+                {
+                  "cost": "READ_REGISTER_BYTE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "2759736"
+                },
+                {
+                  "cost": "STORAGE_HAS_KEY_BASE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "54039896625"
+                },
+                {
+                  "cost": "STORAGE_HAS_KEY_BYTE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "153954225"
+                },
+                {
+                  "cost": "STORAGE_WRITE_BASE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "64196736000"
+                },
+                {
+                  "cost": "STORAGE_WRITE_KEY_BYTE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "352414335"
+                },
+                {
+                  "cost": "STORAGE_WRITE_VALUE_BYTE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "310185390"
+                },
+                {
+                  "cost": "TOUCHING_TRIE_NODE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "25080000000"
+                },
+                {
+                  "cost": "WASM_INSTRUCTION",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "8658684144"
+                },
+                {
+                  "cost": "WRITE_MEMORY_BASE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "8411384583"
+                },
+                {
+                  "cost": "WRITE_MEMORY_BYTE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "119845968"
+                },
+                {
+                  "cost": "WRITE_REGISTER_BASE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "5731044972"
+                },
+                {
+                  "cost": "WRITE_REGISTER_BYTE",
+                  "cost_category": "WASM_HOST_COST",
+                  "gas_used": "106443792"
+                }
+              ],
+              "version": 4
+            },
+            "receipt_ids": [
+              "2xQF8ASWWzaY89M7SBThSVvkUfGftuTN315GU3gSf88y"
+            ],
+            "status": {
+              "SuccessValue": ""
+            },
+            "tokens_burnt": "143128949908900000000"
+          },
+          "proof": [
+            {
+              "direction": "Right",
+              "hash": "7GkiJD3QP5md3miXNwfXjH8Gahmd8j6Eq4qU3iXx9BZ6"
+            },
+            {
+              "direction": "Left",
+              "hash": "EH3cswPXGqhPiAJXcyv5KYMvJ5P7XfhGRvFJjK3rH8ou"
+            },
+            {
+              "direction": "Right",
+              "hash": "48BX5YXHNeYA2FedcLjuRgqZcxM2ir7BkDEeuARJSqSJ"
+            }
+          ]
+        },
+        {
+          "block_hash": "Eh3Me971wTUM3suqW5B3RYettNdPaTqbKMzQPYUNstdb",
+          "id": "2xQF8ASWWzaY89M7SBThSVvkUfGftuTN315GU3gSf88y",
+          "outcome": {
+            "executor_id": "tongid.testnet",
+            "gas_burnt": 223182562500,
+            "logs": [],
+            "metadata": {
+              "contracts": [
+                {
+                  "local": "EDcGAY5Z2smipWZLv3a3KGNrUwcuoBFriTv3sDac6PzJ"
+                }
+              ],
+              "gas_profile": [],
+              "version": 4
+            },
+            "receipt_ids": [],
+            "status": {
+              "SuccessValue": ""
+            },
+            "tokens_burnt": "0"
+          },
+          "proof": [
+            {
+              "direction": "Left",
+              "hash": "7cNepgyBEDHFNtLGhsnxXM3KPp1KJPPX1U5Ew6Vmuk68"
+            },
+            {
+              "direction": "Right",
+              "hash": "DUFiMx3bsjEq8tF2HxUM13MZpB9yLHU8qrEmZU3MCeMz"
+            }
+          ]
+        }
+      ],
+      "status": {
+        "SuccessValue": ""
+      },
+      "transaction": {
+        "actions": [
+          {
+            "FunctionCall": {
+              "args": "e30=",
+              "deposit": "0",
+              "gas": 30000000000000,
+              "method_name": "new"
+            }
+          }
+        ],
+        "hash": "77ZgbP1XCnQMgaMsACvtqahYxBotvTnfhFiD9P7guzSt",
+        "nonce": 277639446000002,
+        "priority_fee": 0,
+        "public_key": "ed25519:AoSY8xDSmNrjfmi4m81KXMZsYx2CAMNC17N46LvDTjn8",
+        "receiver_id": "tongid.testnet",
+        "signature": "ed25519:3p7AJvzpU3Tr6UcbHVe5z2D6z3sCaNJ2zPs5hbFb3jy1iLaEp1y83Q2PWtEs4rh24CUz2r2KFkWvz8GHXSLwzvUJ",
+        "signer_id": "tongid.testnet"
+      },
+      "transaction_outcome": {
+        "block_hash": "6ZqGr6SXUxxpRpFHuWwsVF4mP4P75TYgV6WkNHs8oyXq",
+        "id": "77ZgbP1XCnQMgaMsACvtqahYxBotvTnfhFiD9P7guzSt",
+        "outcome": {
+          "executor_id": "tongid.testnet",
+          "gas_burnt": 308070679670,
+          "logs": [],
+          "metadata": {
+            "gas_profile": null,
+            "version": 1
+          },
+          "receipt_ids": [
+            "EFM9jJ4oynqkn4R3y3Q3dpRsewxDNxqcCXGTahaLhjg8"
+          ],
+          "status": {
+            "SuccessReceiptId": "EFM9jJ4oynqkn4R3y3Q3dpRsewxDNxqcCXGTahaLhjg8"
+          },
+          "tokens_burnt": "30807067967000000000"
+        },
+        "proof": [
+          {
+            "direction": "Right",
+            "hash": "HJTgr17wmav3UdfVVfsRtr1kHD2TNgeC6qXTqt4iSyyC"
+          },
+          {
+            "direction": "Right",
+            "hash": "6e1HMYkxKGND7QJhB121z4VYs5UBnTCGFZN5ayDUw89n"
+          },
+          {
+            "direction": "Right",
+            "hash": "48BX5YXHNeYA2FedcLjuRgqZcxM2ir7BkDEeuARJSqSJ"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "label": "top up sponsor relayer from tong-gas-g7qus6.testnet",
+    "at": "2026-11-14T09:38:43.011Z",
+    "txHash": "7WTaBGj9JHzJ9jDsj9qAfUXvnR7jpZSNw7FrhDcMc5rj",
+    "explorer": "https://testnet.nearblocks.io/txns/7WTaBGj9JHzJ9jDsj9qAfUXvnR7jpZSNw7FrhDcMc5rj",
+    "ok": true,
+    "result": null,
+    "failure": null,
+    "outcome": {
+      "final_execution_status": "FINAL",
+      "receipts_outcome": [
+        {
+          "block_hash": "Cv6Ey2rWvPeCKcWicLJ1GWYfYGNccQiWHs3j94VGjRRW",
+          "id": "5D9S8dn9nVbBR9dMLA3jZYVafrHo5aG8uQ9r88kiQ1TE",
+          "outcome": {
+            "executor_id": "relay.tong-d8l0q0.testnet",
+            "gas_burnt": 223182562500,
+            "logs": [],
+            "metadata": {
+              "contracts": [
+                null
+              ],
+              "gas_profile": [],
+              "version": 4
+            },
+            "receipt_ids": [
+              "BYYQ7K5qdetBzZnMUPNEZtrwJKMbKYC55KFLyhmmBah7"
+            ],
+            "status": {
+              "SuccessValue": ""
+            },
+            "tokens_burnt": "22318256250000000000"
+          },
+          "proof": [
+            {
+              "direction": "Left",
+              "hash": "5kB6w8ayeCpPt7nc8kYb6xMFbhXYo2tqoaG4PjUSoFM8"
+            },
+            {
+              "direction": "Left",
+              "hash": "5921rRnX2ocuVWrDU5fAsMJRw2iviVfcC9CKS6bHVJk8"
+            }
+          ]
+        },
+        {
+          "block_hash": "9mCujSY6wmyxoJY46b2tDagV3V4scUsUG7FWAwmRJVXe",
+          "id": "BYYQ7K5qdetBzZnMUPNEZtrwJKMbKYC55KFLyhmmBah7",
+          "outcome": {
+            "executor_id": "tong-gas-g7qus6.testnet",
+            "gas_burnt": 223182562500,
+            "logs": [],
+            "metadata": {
+              "contracts": [
+                null
+              ],
+              "gas_profile": [],
+              "version": 4
+            },
+            "receipt_ids": [],
+            "status": {
+              "SuccessValue": ""
+            },
+            "tokens_burnt": "0"
+          },
+          "proof": [
+            {
+              "direction": "Left",
+              "hash": "9s5GtJdsFA8vw4dL34ELWrY9pAoFyCtKwULX6ut3oTER"
+            },
+            {
+              "direction": "Right",
+              "hash": "GaJpqg6MVErdDcmxtK2H1ADXHoBn1zEeWCrNrx2KTSgC"
+            },
+            {
+              "direction": "Right",
+              "hash": "GDhzMfXe69fGqQMnNWycQkuGQuWmr1PHM1GCuTG9mr5m"
+            }
+          ]
+        }
+      ],
+      "status": {
+        "SuccessValue": ""
+      },
+      "transaction": {
+        "actions": [
+          {
+            "Transfer": {
+              "deposit": "9900000000000000000000000"
+            }
+          }
+        ],
+        "hash": "7WTaBGj9JHzJ9jDsj9qAfUXvnR7jpZSNw7FrhDcMc5rj",
+        "nonce": 277639497000001,
+        "priority_fee": 0,
+        "public_key": "ed25519:3bjvdCJqWTANFDhgERtgZs4BTMKWzt3Srq9Ja9zKPJBA",
+        "receiver_id": "relay.tong-d8l0q0.testnet",
+        "signature": "ed25519:DQ8c8Frmvk39ho9uScUjfzpK9ncW8VGLy7Z54nuJje3B16ik8c3HEP6SWQxZMbJKpsbkWtU5Dooq59xCHtMaEG8",
+        "signer_id": "tong-gas-g7qus6.testnet"
+      },
+      "transaction_outcome": {
+        "block_hash": "6RzxNxzcM4aykXUSu74HFqLn8JN1wDH5ZpWQ8YRamge6",
+        "id": "7WTaBGj9JHzJ9jDsj9qAfUXvnR7jpZSNw7FrhDcMc5rj",
+        "outcome": {
+          "executor_id": "tong-gas-g7qus6.testnet",
+          "gas_burnt": 223182562500,
+          "logs": [],
+          "metadata": {
+            "gas_profile": null,
+            "version": 1
+          },
+          "receipt_ids": [
+            "5D9S8dn9nVbBR9dMLA3jZYVafrHo5aG8uQ9r88kiQ1TE"
+          ],
+          "status": {
+            "SuccessReceiptId": "5D9S8dn9nVbBR9dMLA3jZYVafrHo5aG8uQ9r88kiQ1TE"
+          },
+          "tokens_burnt": "22318256250000000000"
+        },
+        "proof": [
+          {
+            "direction": "Left",
+            "hash": "BXz6Akjis6FTVvXU6xWfPNr85NJ8JYpB7igbWyMhf7QN"
+          },
+          {
+            "direction": "Right",
+            "hash": "GBAjnHciGHRnyMtjevyn22UnGsHjxgGGHLGexcae7ey9"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "label": "top up sponsor relayer from tong-gas-g7r241.testnet",
+    "at": "2026-11-14T09:38:53.332Z",
+    "txHash": "9JVa4sSByi78SYW2iHP6zUA2fKjyok953ZZEJcUH4bAe",
+    "explorer": "https://testnet.nearblocks.io/txns/9JVa4sSByi78SYW2iHP6zUA2fKjyok953ZZEJcUH4bAe",
+    "ok": true,
+    "result": null,
+    "failure": null,
+    "outcome": {
+      "final_execution_status": "FINAL",
+      "receipts_outcome": [
+        {
+          "block_hash": "83x6wWpjpkiVLyoXPuWsE1jyxJqwjJSjBb3E8nhnQ8Cs",
+          "id": "Gj8MbQ426395BvnkEmxJtdErvdcEir1DXbRx4YwZnSo1",
+          "outcome": {
+            "executor_id": "relay.tong-d8l0q0.testnet",
+            "gas_burnt": 223182562500,
+            "logs": [],
+            "metadata": {
+              "contracts": [
+                null
+              ],
+              "gas_profile": [],
+              "version": 4
+            },
+            "receipt_ids": [
+              "4rKrfUtKZbo94jbN3MvxreFiYTJfeMbHqVhpdz2dWZeZ"
+            ],
+            "status": {
+              "SuccessValue": ""
+            },
+            "tokens_burnt": "22318256250000000000"
+          },
+          "proof": [
+            {
+              "direction": "Right",
+              "hash": "DjnECUqtRmpFtKAfB7wNE9v9h5oBanEvWZh65VzRKgAp"
+            },
+            {
+              "direction": "Left",
+              "hash": "GLh522jZaaZGoA1FrcAsK2Wqfct7vpszWpoK6iX198ki"
+            },
+            {
+              "direction": "Right",
+              "hash": "F7jpp9QrpGKdG3K5s8cR3rCWotfvwP756DvZV9D6Ud9U"
+            },
+            {
+              "direction": "Right",
+              "hash": "BYGN3inRwqdRsFXk4ZwTdzwVfCAhVQWsgDEdCjsR6rKJ"
+            }
+          ]
+        },
+        {
+          "block_hash": "CmHwzNMFatRRLDAFhNtqfNW6hfMnCXC5g8k7oEmpYEqg",
+          "id": "4rKrfUtKZbo94jbN3MvxreFiYTJfeMbHqVhpdz2dWZeZ",
+          "outcome": {
+            "executor_id": "tong-gas-g7r241.testnet",
+            "gas_burnt": 223182562500,
+            "logs": [],
+            "metadata": {
+              "contracts": [
+                null
+              ],
+              "gas_profile": [],
+              "version": 4
+            },
+            "receipt_ids": [],
+            "status": {
+              "SuccessValue": ""
+            },
+            "tokens_burnt": "0"
+          },
+          "proof": [
+            {
+              "direction": "Left",
+              "hash": "8hycjRUYZXNfCVNc7Fd4Y6mFq6ZGcGBxVhmuTNdLXV9Y"
+            }
+          ]
+        }
+      ],
+      "status": {
+        "SuccessValue": ""
+      },
+      "transaction": {
+        "actions": [
+          {
+            "Transfer": {
+              "deposit": "9900000000000000000000000"
+            }
+          }
+        ],
+        "hash": "9JVa4sSByi78SYW2iHP6zUA2fKjyok953ZZEJcUH4bAe",
+        "nonce": 277639516000001,
+        "priority_fee": 0,
+        "public_key": "ed25519:9hw2aTZAeVx7bSTGvc2tJtbvGX3SdKnAH2cssHQGpnET",
+        "receiver_id": "relay.tong-d8l0q0.testnet",
+        "signature": "ed25519:qmKyYvsTu6VnKxFq49oS5eYtius7WotiHnxzCeS4Vjj9xT18cj4AjpYaFujmgb6X9bpRwqfcvM4oTThJQGZcdyv",
+        "signer_id": "tong-gas-g7r241.testnet"
+      },
+      "transaction_outcome": {
+        "block_hash": "4UbZHhfXZduR6RXmNnGf96vxCRVpL4XfVJd2Bw8AyRQ9",
+        "id": "9JVa4sSByi78SYW2iHP6zUA2fKjyok953ZZEJcUH4bAe",
+        "outcome": {
+          "executor_id": "tong-gas-g7r241.testnet",
+          "gas_burnt": 223182562500,
+          "logs": [],
+          "metadata": {
+            "gas_profile": null,
+            "version": 1
+          },
+          "receipt_ids": [
+            "Gj8MbQ426395BvnkEmxJtdErvdcEir1DXbRx4YwZnSo1"
+          ],
+          "status": {
+            "SuccessReceiptId": "Gj8MbQ426395BvnkEmxJtdErvdcEir1DXbRx4YwZnSo1"
+          },
+          "tokens_burnt": "22318256250000000000"
+        },
+        "proof": [
+          {
+            "direction": "Left",
+            "hash": "FdRxzN5A2iYmfGHLaHohvGYJyEWCqqUB6WZWiPhN9YRf"
+          },
+          {
+            "direction": "Right",
+            "hash": "9ZisYG5EULBLwjQPwC2xYjN3wLDRcorp8qqkcKg1XwDJ"
+          }
+        ]
+      }
+    }
   }
 ]

@@ -7,6 +7,8 @@ import {
   unlink,
 } from "node:fs/promises";
 import { dirname } from "node:path";
+import { createHash } from "node:crypto";
+import { actions, encodeTransaction, baseEncode } from "near-api-js";
 import {
   FEES,
   validateRequest,
@@ -145,31 +147,31 @@ export async function relay({
       "Testnet sponsor needs more NEAR; ask the operator to fund the relayer.",
     );
   await budget.reserve(FEES[request.action]);
+  // Sign locally so the hash is known before broadcast: a refused request keeps its explorer link.
+  const signed = await account.createSignedTransaction({
+    receiverId: contractId,
+    actions: [actions.functionCall("execute", { request, signature }, GAS, BigInt(FEES[request.action]))],
+  });
+  const txHash = baseEncode(createHash("sha256").update(encodeTransaction(signed.transaction)).digest());
   let outcome;
   try {
-    outcome = await account.callFunctionRaw({
-      contractId,
-      methodName: "execute",
-      args: { request, signature },
-      gas: GAS,
-      deposit: BigInt(FEES[request.action]),
-      waitUntil: "FINAL",
-    });
+    outcome = await rpc(
+      "send_tx",
+      { signed_tx_base64: Buffer.from(signed.encode()).toString("base64"), wait_until: "FINAL" },
+      rpcUrl,
+    );
   } catch (error) {
-    if (error.transaction_outcome) outcome = error;
-    else {
-      await record({
-        at: new Date().toISOString(),
-        action: request.action,
-        wallet: request.wallet,
-        error: String(error.message).slice(0, 600),
-        txHash: error.context?.transactionHash ?? null,
-        ok: false,
-      });
-      throw new Error(
-        "Transaction did not return final success; inspect relayer ledger before retrying.",
-      );
-    }
+    await record({
+      at: new Date().toISOString(),
+      action: request.action,
+      wallet: request.wallet,
+      error: String(error.message).slice(0, 600),
+      txHash,
+      ok: false,
+    });
+    throw new Error(
+      `Transaction ${txHash} did not return final status (${String(error.message).slice(0, 120)}); check the explorer before retrying.`,
+    );
   }
   const result = decodeOutcome(outcome);
   await record({
