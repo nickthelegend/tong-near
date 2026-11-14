@@ -5,31 +5,45 @@ import { CopyButton, Ext, cx } from "../components/ui.jsx";
 
 const SNIPPETS = {
   React: `import { useTong } from '@tong/sdk/react'
+const GUESTBOOK = 'guestbook.near-examples.testnet'
 
 export function ConnectButton() {
   const tong = useTong({ contractId: '${CONTRACT_ID}', relayerUrl })
 
+  const post = async () => {
+    await tong.grant(GUESTBOOK, ['add_message'], '0', 7)   // once, shown in the wallet
+    await tong.call(GUESTBOOK, 'add_message', { text: 'gm NEAR' })
+  }
   return tong.wallet
-    ? <button onClick={() => tong.setNote('gm NEAR')}>Sign a note</button>
-    : <button onClick={async () => { await tong.connect('evm'); await tong.link() }}>
-        Continue with MetaMask
-      </button>
+    ? <button onClick={post}>Post to the guestbook</button>
+    : <button onClick={() => tong.connect('evm')}>Continue with MetaMask</button>
 }`,
   JavaScript: `import { TongConnector } from '@tong/sdk'
 
 const tong = new TongConnector({ contractId: '${CONTRACT_ID}', relayerUrl })
 
-await tong.connect('solana')        // or 'evm'
-await tong.link()                   // one signature creates the NEAR account
-await tong.setNote('Hello, NEAR.')  // acts on NEAR, verified on chain
+await tong.connect('solana')               // or 'evm'
+await tong.link('maya')                    // maya.${CONTRACT_ID}, zero keys
+await tong.call('wrap.testnet', 'near_deposit', {}, '100000000000000000000000')
+await tong.sendNear('bob.testnet', '50000000000000000000000')
+
+try {
+  await tong.call('wrap.testnet', 'near_deposit', {}, '500000000000000000000000')
+} catch (e) {
+  e.refused  // true: over the 0.2 NEAR cap, refused on chain; e.txHash is the receipt
+}
 
 const tx = await tong.signSepolia({ to, value_wei: '0', nonce, gas_price_wei })
 // tx.result is the NEAR MPC signature for your derived Sepolia address`,
   "Request schema": `TongRequest {
   domain:   'near:testnet:${CONTRACT_ID}'
   wallet:   'evm:0x<40 hex>' | 'solana:<64 hex public key>'
-  action:   'link' | 'set_note' | 'sign_sepolia'
+  action:   'link' | 'call' | 'send_near' | 'grant' | 'revoke'
+          | 'set_note' | 'sign_sepolia'
   data:     '<exact JSON string>'
+            link  {"name":"maya"}
+            call  {"contract","method","args","deposit"}
+            grant {"contract","methods","max_deposit","days"}
   nonce:    '<uint64, from get_identity>'
   deadline: '<unix seconds, ≤ now + 300>'
 }`,
@@ -59,8 +73,12 @@ export default function Developers() {
         <div className="dev-intro">
           <h2>Let MetaMask and Phantom users into your NEAR app.</h2>
           <p>
-            The Tong SDK asks the user's wallet to sign, sends the request to a sponsor, and your contract sees a normal NEAR account.
+            The Tong SDK asks the user's wallet to sign, sends the request to a sponsor, and your contract sees a normal named NEAR account.
+            Your app asks for one grant; the contract keeps you inside it.
           </p>
+          <a className="btn btn-dark btn-sm" href="#/demo" style={{ marginBottom: 14 }}>
+            Open the demo dApp: NEAR Guestbook in 6 lines
+          </a>
           <div className="install">
             <Terminal size={15} />
             <code>pnpm add @tong/sdk</code>

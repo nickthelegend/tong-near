@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ArrowRight, ArrowUpRight, Check, ChevronDown, KeyRound, LockKeyhole, ShieldCheck, TimerReset, Ban } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, ChevronDown, KeyRound, LockKeyhole, ShieldCheck, TimerReset, Ban, Minus, X as XIcon } from "lucide-react";
 import { CONTRACT_ID, DEPLOYMENT, accessKeys, factoryLatest, nearAccount, nearTx, short, timeAgo } from "../lib/chain.js";
 import { useTongApp } from "../lib/tong.jsx";
 import { EthMark, SolMark, NearMark, Ext, Skeleton } from "../components/ui.jsx";
@@ -24,12 +24,16 @@ function useLiveStats() {
 
 const FAQ = [
   [
+    "Isn't this what NEAR's Ethereum wallet support already does?",
+    "NEAR's NEP-518 gives MetaMask a 0x… account that pays its own gas and has no spending limits. Tong adds a readable name, sponsored gas, Solana wallets and limits the contract enforces. NEP-518 is protocol-native and audited; Tong is a testnet prototype.",
+  ],
+  [
     "Do I need a NEAR wallet or a new seed phrase?",
     "No. You sign with MetaMask, Rabby, Phantom or any injected EVM or Solana wallet. Tong's contract checks that signature on NEAR and acts from an account that belongs to your wallet.",
   ],
   [
     "Who holds the keys to my NEAR account?",
-    "Nobody. Your Tong account is created with zero access keys. Only the locked Tong contract can call it, and only after your wallet signs that exact action.",
+    "Nobody. Your Tong account is created with zero access keys. Only the locked Tong contract can call it, and only after your wallet signs that exact action and it fits your limits.",
   ],
   [
     "How does it sign for Ethereum?",
@@ -37,13 +41,129 @@ const FAQ = [
   ],
   [
     "What can Tong do today?",
-    "Create your account, save a signed note on NEAR, and sign capped Sepolia transfers (at most 0.001 ETH). Every action expires in five minutes and can run only once.",
+    "Create a named NEAR account, wrap NEAR on wrap.testnet, post to the NEAR Guestbook, send NEAR, save a note, and sign capped Sepolia transfers. Every request expires in five minutes and runs once.",
   ],
   [
     "Is this live?",
     "Yes, on NEAR testnet and Sepolia test ETH. Tong is a hackathon build, not audited infrastructure. Use test funds only.",
   ],
 ];
+
+
+const Y = ({ t }) => (
+  <span className="w-yes">
+    <Check size={14} /> {t}
+  </span>
+);
+const N = ({ t }) => (
+  <span className="w-no">
+    <XIcon size={14} /> {t}
+  </span>
+);
+const P = ({ t }) => (
+  <span className="w-part">
+    <Minus size={14} /> {t}
+  </span>
+);
+const WHY = [
+  {
+    name: "NEAR Ethereum wallets",
+    how: "NEP-518 eth-implicit accounts via NEAR Connect",
+    src: "https://github.com/near/NEPs/blob/master/neps/nep-0518.md",
+    cells: [<Y t="EVM only" />, <N t="0x… address" />, <N t="Your account pays" />, <N t="None" />, <P t="Through apps" />],
+  },
+  {
+    name: "HOT Wallet / HOT Kit",
+    how: "HOT's own MPC network; Kit connects wallets",
+    src: "https://hot-labs.gitbook.io/hot-protocol/hot-kit",
+    cells: [<P t="Kit yes, wallet makes a new key" />, <P t="Not documented" />, <P t="Some intents" />, <P t="Not documented" />, <Y t="HOT MPC" />],
+  },
+  {
+    name: "Embedded wallets",
+    how: "Privy, Dynamic, Web3Auth on NEAR",
+    src: "https://docs.privy.io/recipes/use-tier-2",
+    cells: [<N t="New key via login" />, <N t="64-hex account" />, <N t="Not on NEAR" />, <P t="Off chain, EVM-first" />, <N t="No" />],
+  },
+  {
+    name: "NEAR Intents",
+    how: "intents.near verifies ETH and Solana signatures",
+    src: "https://docs.near-intents.org/near-intents/market-makers/verifier/signing-intents",
+    cells: [<Y t="EVM + Solana" />, <N t="A balance, not an account" />, <P t="Solvers execute" />, <P t="Per intent" />, <N t="Swaps only" />],
+  },
+  {
+    name: "Function-call keys + relayer",
+    how: "NEP-366 meta-transactions",
+    src: "https://docs.near.org/protocol/accounts-contracts/access-keys",
+    cells: [<N t="Needs a NEAR key" />, <Y t="Yes" />, <Y t="Yes" />, <P t="1 contract, no deposits, no daily cap" />, <N t="No" />],
+  },
+];
+function WhyTong() {
+  return (
+    <section className="l-section l-why" id="why">
+      <div className="l-head">
+        <h2>Other ways in, and what each one misses.</h2>
+        <p>Every piece of Tong exists somewhere. Nothing we found puts all five together. Checked Nov 14, 2026; sources linked.</p>
+      </div>
+      <div className="why-wrap">
+        <table className="why-table">
+          <thead>
+            <tr>
+              <th />
+              <th>Wallet you already have</th>
+              <th>Readable NEAR name</th>
+              <th>Gas paid for you</th>
+              <th>Limits enforced on chain</th>
+              <th>Signs other chains</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="why-tong">
+              <th>
+                <b>Tong</b>
+                <small>this build, NEAR testnet</small>
+              </th>
+              <td>
+                <Y t="EVM + Solana" />
+              </td>
+              <td>
+                <Y t="maya.tongid.testnet" />
+              </td>
+              <td>
+                <Y t="Sponsor, budgeted" />
+              </td>
+              <td>
+                <Y t="Allowlist, caps, daily, expiry" />
+              </td>
+              <td>
+                <Y t="Chain Signatures" />
+              </td>
+            </tr>
+            {WHY.map((r) => (
+              <tr key={r.name}>
+                <th>
+                  <b>{r.name}</b>
+                  <small>
+                    {r.how}{" "}
+                    <a href={r.src} target="_blank" rel="noreferrer" aria-label={`Source for ${r.name}`}>
+                      source
+                    </a>
+                  </small>
+                </th>
+                {r.cells.map((c, i) => (
+                  <td key={i}>{c}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="why-honest">
+        <b>Where others win:</b> NEP-518 is built into the protocol and audited. HOT has over a million users and many chains. Privy's policy
+        engine is far more mature. Tong is a testnet prototype: unaudited, one sponsor, Sepolia only.
+      </p>
+    </section>
+  );
+}
 
 export default function Landing() {
   const stats = useLiveStats();
@@ -57,6 +177,7 @@ export default function Landing() {
           <Logo />
         </a>
         <nav aria-label="Main">
+          <a href="#why">Why Tong</a>
           <a href="#how">How it works</a>
           <a href="#/app/apps">Apps</a>
           <a href="#/app/developers">Developers</a>
@@ -74,8 +195,8 @@ export default function Landing() {
           </p>
           <h1>Use NEAR with the wallet you already have.</h1>
           <p className="l-sub">
-            Sign in with MetaMask or Phantom. Tong turns that signature into a NEAR account that acts for you, and signs
-            for Ethereum with Chain Signatures.
+            Tong gives your MetaMask or Phantom wallet a named NEAR account. The sponsor pays the gas, and spending limits
+            are enforced by NEAR itself, not by an app.
           </p>
           <div className="l-cta">
             <a className="btn btn-coral btn-lg" href="#/connect">
@@ -90,10 +211,10 @@ export default function Landing() {
               <Check size={15} /> No seed phrase
             </li>
             <li>
-              <Check size={15} /> Zero keys on your account
+              <Check size={15} /> A real name: you.tongid.testnet
             </li>
             <li>
-              <Check size={15} /> Gas sponsored on testnet
+              <Check size={15} /> Limits NEAR enforces
             </li>
           </ul>
         </div>
@@ -127,7 +248,7 @@ export default function Landing() {
             <div className="l-widget-result">
               <span className="dot-live" />
               <span>
-                0x98f5…e479 is <b>dbec…08e2.{CONTRACT_ID}</b>
+                0x98f5…e479 is <b>maya.{CONTRACT_ID}</b>
               </span>
             </div>
             <p className="l-widget-foot">Your keys stay in your wallet.</p>
@@ -159,6 +280,8 @@ export default function Landing() {
         </div>
       </section>
 
+      <WhyTong />
+
       <section className="l-section" id="how">
         <div className="l-head">
           <h2>One signature. A NEAR account that acts for you.</h2>
@@ -176,7 +299,7 @@ export default function Landing() {
               </div>
               <div className="mini-sign">
                 <span>Sign request</span>
-                <code>action: link</code>
+                <code>action: link · name: maya</code>
                 <code>nonce: 0 · expires 4:00</code>
               </div>
             </div>
@@ -188,14 +311,14 @@ export default function Landing() {
               <div className="mini-account">
                 <NearMark size={18} />
                 <div>
-                  <b>dbec…08e2.{CONTRACT_ID}</b>
+                  <b>maya.{CONTRACT_ID}</b>
                   <small>0 access keys · controlled by your wallet</small>
                 </div>
               </div>
-              <div className="mini-note">“Hello, NEAR. From my own wallet.”</div>
+              <div className="mini-note">wrap.testnet · near_deposit · 0.1 NEAR ✓</div>
             </div>
             <h3>Act on NEAR</h3>
-            <p>The contract verifies your signature on chain, then your NEAR account does exactly that action.</p>
+            <p>Wrap NEAR, post, send. The contract checks your signature and your limits, then your account acts.</p>
           </article>
           <article className="how-card">
             <div className="how-ui">
@@ -219,10 +342,9 @@ export default function Landing() {
       <section className="l-section l-bento">
         <article className="bento bento-wide bento-pearl">
           <div>
-            <h3>One NEAR account per wallet</h3>
+            <h3>A NEAR name, owned by your signature</h3>
             <p>
-              Every MetaMask or Phantom address maps to its own account under <code>{CONTRACT_ID}</code>. Same wallet, same
-              account, on every device.
+              Pick <code>maya.{CONTRACT_ID}</code>. It has zero keys: only your wallet's signature moves it, on every device.
             </p>
             <a className="text-link" href="#/connect">
               Find yours <ArrowUpRight size={15} />
@@ -251,8 +373,8 @@ export default function Landing() {
           <pre className="bento-code">
             <code>{`const tong = new TongConnector({ contractId })
 await tong.connect('evm')
-await tong.link()
-await tong.setNote('Hello, NEAR.')`}</code>
+await tong.grant(app, ['add_message'], '0', 7)
+await tong.call(app, 'add_message', { text })`}</code>
           </pre>
         </article>
       </section>
@@ -283,8 +405,8 @@ await tong.setNote('Hello, NEAR.')`}</code>
           </div>
           <div>
             <LockKeyhole size={20} />
-            <h3>Exceed the caps</h3>
-            <p>Sepolia transfers stop at 0.001 ETH and 100 gwei. Notes stop at 256 bytes.</p>
+            <h3>Exceed your limits</h3>
+            <p>Over the per-call cap, past the daily allowance, or an app you never allowed: the contract refuses it on chain.</p>
           </div>
         </div>
         <div className="sec-proof">

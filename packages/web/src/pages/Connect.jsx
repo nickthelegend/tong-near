@@ -1,7 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, ExternalLink, FlaskConical, ShieldCheck, X } from "lucide-react";
 import { useTongApp, useDetectedWallets } from "../lib/tong.jsx";
-import { CONTRACT_ID, nearTx, shortAccount, walletLabel, formatNear } from "../lib/chain.js";
+import { CONTRACT_ID, nearTx, shortAccount, walletLabel, formatNear, nameAvailable } from "../lib/chain.js";
+import { NAME_RE } from "@tong/sdk";
+
+/* Live availability of <name>.<factory>, read from the contract. */
+function useName(initial) {
+  const [name, setName] = useState(initial);
+  const [check, setCheck] = useState({ state: "idle" });
+  useEffect(() => {
+    if (!name) return setCheck({ state: "idle" });
+    if (!NAME_RE.test(name)) return setCheck({ state: "bad", text: "2–32 lowercase letters, digits, - or _" });
+    setCheck({ state: "checking" });
+    let on = true;
+    const t = setTimeout(() => {
+      nameAvailable(name)
+        .then((ok) => on && setCheck(ok ? { state: "ok", text: "Available" } : { state: "taken", text: "Taken. Try another." }))
+        .catch((e) => on && setCheck({ state: "bad", text: e.message.slice(0, 80) }));
+    }, 350);
+    return () => {
+      on = false;
+      clearTimeout(t);
+    };
+  }, [name]);
+  return [name, setName, check];
+}
 import { EthMark, SolMark, NearMark, Spinner, ErrorNote, Steps, Ext, cx } from "../components/ui.jsx";
 import { Logo } from "../components/Logo.jsx";
 
@@ -39,6 +62,7 @@ export default function Connect() {
   const [error, setError] = useState(null);
   const connected = tong.canSign;
   const linked = tong.identity?.ready;
+  const [name, setName, check] = useName("");
 
   async function pick(option) {
     setError(null);
@@ -54,7 +78,7 @@ export default function Connect() {
   async function create() {
     setError(null);
     try {
-      await tong.link();
+      await tong.link(name);
     } catch (e) {
       setError(e.message);
     }
@@ -152,7 +176,7 @@ export default function Connect() {
             <p className="muted">
               {linked
                 ? "This wallet already has a Tong account on NEAR."
-                : "One signature creates an account on NEAR that only your wallet can direct."}
+                : "Pick a name. One signature creates a NEAR account that only your wallet can direct."}
             </p>
             <div className="c-identity">
               <div className="c-id-row">
@@ -174,7 +198,7 @@ export default function Connect() {
                 </span>
                 <span>
                   <small>Your NEAR account</small>
-                  <b className="mono-b">{shortAccount(tong.identity?.account_id ?? tong.predicted)}</b>
+                  <b className="mono-b">{tong.identity?.account_id ?? (name ? `${name}.${CONTRACT_ID}` : `yourname.${CONTRACT_ID}`)}</b>
                 </span>
                 {linked ? (
                   <span className="chip chip-ok">Ready</span>
@@ -187,14 +211,32 @@ export default function Connect() {
             </div>
             {!linked ? (
               <>
+                <label className="field-label" htmlFor="c-name">
+                  Pick your NEAR name
+                </label>
+                <div className={cx("name-field", check.state)}>
+                  <input
+                    id="c-name"
+                    value={name}
+                    autoComplete="off"
+                    spellCheck="false"
+                    placeholder="yourname"
+                    maxLength={32}
+                    onChange={(e) => setName(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
+                  />
+                  <span className="name-suffix">.{CONTRACT_ID}</span>
+                </div>
+                <p className={cx("name-check", check.state)} aria-live="polite">
+                  {check.state === "checking" ? "Checking on NEAR…" : check.state === "ok" ? <><Check size={13} /> {`${name}.${CONTRACT_ID} is available`}</> : check.text ?? "A readable account, like an ENS name. Yours alone."}
+                </p>
                 <dl className="c-terms">
                   <div>
                     <dt>You sign</dt>
-                    <dd>action “link”, nonce 0, expires in 4 min</dd>
+                    <dd>action “link”, your name, nonce 0, expires in 4 min</dd>
                   </div>
                   <div>
                     <dt>Account storage</dt>
-                    <dd>{formatNear(tong.fees.link, 2)} test NEAR · paid by the Tong sponsor</dd>
+                    <dd>{formatNear(tong.fees.link, 2)} test NEAR · paid by the Tong sponsor (0.45 NEAR starts in your account)</dd>
                   </div>
                   <div>
                     <dt>Keys on the account</dt>
@@ -202,9 +244,9 @@ export default function Connect() {
                   </div>
                 </dl>
                 {task && !task.error && <Steps current={task.phase} steps={LINK_STEPS} />}
-                <button type="button" className="btn btn-dark btn-block btn-lg" onClick={create} disabled={!!task && !task.error && task.phase !== "done"}>
+                <button type="button" className="btn btn-dark btn-block btn-lg" onClick={create} disabled={(!!task && !task.error && task.phase !== "done") || check.state !== "ok"}>
                   {task && !task.error && task.phase !== "done" ? <Spinner /> : <ShieldCheck size={18} />}
-                  {task && !task.error && task.phase !== "done" ? tong.phases[task.phase] + "…" : "Sign & create account"}
+                  {task && !task.error && task.phase !== "done" ? tong.phases[task.phase] + "…" : name && check.state === "ok" ? `Sign & create ${name}` : "Sign & create account"}
                 </button>
               </>
             ) : (

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, Copy, ArrowUpRight, LoaderCircle } from "lucide-react";
+import { Check, Copy, ArrowUpRight, LoaderCircle, Ban } from "lucide-react";
 
 export const cx = (...p) => p.filter(Boolean).join(" ");
 
@@ -138,5 +138,58 @@ export function Steps({ steps, current, error }) {
         );
       })}
     </ol>
+  );
+}
+
+/* Result of a signed action: confirmed, or refused on chain with the receipt as proof. */
+export function Outcome({ task, title = "Done on NEAR", children }) {
+  if (!task) return null;
+  const url = (h) => `https://testnet.nearblocks.io/txns/${h}`;
+  if (task.phase === "refused" && task.refused)
+    return (
+      <div className="refused-card" role="alert">
+        <span className="refused-ico">
+          <Ban size={20} />
+        </span>
+        <div>
+          <b>Refused on chain</b>
+          <p>{task.refused.reason}</p>
+          <a href={url(task.refused.txHash)} target="_blank" rel="noreferrer" className="ext">
+            {task.refused.txHash} <ArrowUpRight size={12} />
+          </a>
+          <small>The transaction reached NEAR and the Tong contract rejected it. Nothing moved, and your nonce is unused.</small>
+        </div>
+      </div>
+    );
+  if (task.phase === "done" && task.result)
+    return (
+      <div className="success-card">
+        <img src="/art/3d/success-check.webp" alt="" width="64" height="64" />
+        <div>
+          <b>{title}</b>
+          {children}
+          <a href={url(task.result.txHash)} target="_blank" rel="noreferrer" className="ext">
+            {task.result.txHash} <ArrowUpRight size={12} />
+          </a>
+        </div>
+      </div>
+    );
+  return null;
+}
+
+export function Meter({ label, value, max, fmt = (x) => x, tone }) {
+  const pct = max > 0n ? Number((BigInt(value) * 1000n) / BigInt(max)) / 10 : 0;
+  return (
+    <div className={cx("pmeter", tone && `pmeter-${tone}`)}>
+      <div className="meter-top">
+        <span>{label}</span>
+        <b>
+          {fmt(value)} / {fmt(max)}
+        </b>
+      </div>
+      <div className="meter">
+        <i style={{ width: `${Math.min(100, pct)}%` }} />
+      </div>
+    </div>
   );
 }

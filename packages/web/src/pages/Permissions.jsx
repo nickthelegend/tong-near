@@ -1,8 +1,85 @@
 import React, { useEffect, useState } from "react";
-import { Check, KeyRound, Lock, TimerReset, X } from "lucide-react";
+import { Check, KeyRound, Lock, TimerReset, X, Trash2 } from "lucide-react";
 import { useTongApp } from "../lib/tong.jsx";
-import { CONTRACT_ID, DEPLOYMENT, accessKeys, getConfig, formatNear, nearAccount, short, shortAccount, walletLabel } from "../lib/chain.js";
-import { Ext, Skeleton, Status } from "../components/ui.jsx";
+import { CONTRACT_ID, DEPLOYMENT, accessKeys, getConfig, formatNear, nearAccount, short, shortAccount, walletLabel, policyToday } from "../lib/chain.js";
+import { Ext, Skeleton, Status, Meter, Outcome, Spinner } from "../components/ui.jsx";
+
+const nearFmt = (v) => `${formatNear(v, 3)} NEAR`;
+const until = (s) => {
+  const days = Math.ceil((Number(s) * 1000 - Date.now()) / 86_400_000);
+  return days <= 0 ? "expired" : `${days} day${days === 1 ? "" : "s"} left`;
+};
+
+function Policy() {
+  const tong = useTongApp();
+  const p = tong.identity?.policy;
+  const today = policyToday(p);
+  const task = ["grant", "revoke"].includes(tong.task?.action) ? tong.task : null;
+  const working = task && !task.error && !["done", "refused"].includes(task.phase);
+  if (!tong.identity?.ready)
+    return (
+      <section className="card span-2">
+        <div className="card-head">
+          <h3>Your limits</h3>
+        </div>
+        <p className="muted">Create your Tong account to get a policy: an app allowlist, per-call caps, a daily allowance and expiry, all on chain.</p>
+      </section>
+    );
+  return (
+    <section className="card span-2">
+      <div className="card-head">
+        <h3>Your account's policy</h3>
+        <span className="chip">Live from get_identity</span>
+      </div>
+      <Meter label="Spent today (apps + sends)" value={today.spent} max={today.cap} fmt={nearFmt} />
+      <ul className="grant-list">
+        <li className="grant-row muted small">
+          <span>App and methods</span>
+          <span className="gr-hide">Per call</span>
+          <span className="gr-hide">Expires</span>
+          <span />
+        </li>
+        {p.grants.map((g) => (
+          <li key={g.contract} className="grant-row">
+            <span>
+              <b className="mono">{g.contract}</b>
+              <small className="mono">{g.methods.join(" · ")}</small>
+            </span>
+            <span className="gr-hide">{BigInt(g.max_deposit) === 0n ? "no deposit" : `≤ ${nearFmt(g.max_deposit)}`}</span>
+            <span className="gr-hide">{until(g.expires_at)}</span>
+            <button type="button" className="btn btn-ghost btn-sm" disabled={working || !tong.canSign} onClick={() => tong.revoke(g.contract).catch(() => {})}>
+              {working && task.request?.data?.includes(g.contract) ? <Spinner size={14} /> : <Trash2 size={14} />} Revoke
+            </button>
+          </li>
+        ))}
+        <li className="grant-row">
+          <span>
+            <b>Send NEAR</b>
+            <small>any account</small>
+          </span>
+          <span className="gr-hide">≤ {nearFmt(p.send_cap)}</span>
+          <span className="gr-hide">no expiry</span>
+          <Status tone="ok">On</Status>
+        </li>
+        <li className="grant-row denied">
+          <span>
+            <b>Everything else</b>
+            <small>other contracts, keys, deploys, deletes</small>
+          </span>
+          <span className="gr-hide">—</span>
+          <span className="gr-hide">—</span>
+          <Status tone="bad">
+            <X size={11} /> Refused
+          </Status>
+        </li>
+      </ul>
+      <Outcome task={task} title={task?.label ?? "Policy updated"} />
+      <p className="card-foot">
+        Daily allowance {nearFmt(today.cap)} resets at 00:00 UTC. Grants are added by apps you approve and removed with one signature.
+      </p>
+    </section>
+  );
+}
 
 function useLive() {
   const [s, setS] = useState({});
@@ -33,9 +110,10 @@ export default function Permissions() {
   const pct = (a, m) => Math.min(100, Math.round((Number(a) / Number(m)) * 100));
   return (
     <div className="perm-grid">
+      <Policy />
       <section className="card span-2">
         <div className="card-head">
-          <h3>What {tong.active ? walletLabel(tong.active) : "a wallet"} can do on NEAR</h3>
+          <h3>What any wallet can ask Tong to do</h3>
           <span className="chip">Live from get_config</span>
         </div>
         <table className="tx-table perm-table">
@@ -43,15 +121,18 @@ export default function Permissions() {
             <tr>
               <th>Action</th>
               <th>Limit</th>
-              <th>Fee (sponsored)</th>
+              <th>Paid by</th>
               <th className="r">Status</th>
             </tr>
           </thead>
           <tbody>
             {[
-              ["link", "Create your account", "Once per wallet", c ? `${formatNear(c.link_deposit, 2)} NEAR storage` : "…"],
-              ["set_note", "Save a note", "≤ 256 bytes, no deposit", "Gas only"],
-              ["sign_sepolia", "Sign on Sepolia", "≤ 0.001 ETH · ≤ 100 gwei · 21,000 gas", c ? `${formatNear(c.mpc_deposit, 2)} NEAR MPC fee` : "…"],
+              ["link", "Create your named account", "Once per wallet and name", c ? `Sponsor · ${formatNear(c.link_deposit, 2)} NEAR` : "…"],
+              ["call", "Use an app", "Your grants: methods, per-call cap, expiry", "Sponsor gas · your NEAR"],
+              ["send_near", "Send NEAR", "Per-transfer cap + daily allowance", "Sponsor gas · your NEAR"],
+              ["grant", "Allow / remove an app", "≤ 1 NEAR per call · ≤ 30 days · 8 apps", "Sponsor gas"],
+              ["set_note", "Save a note", "≤ 256 bytes", "Sponsor gas"],
+              ["sign_sepolia", "Sign on Sepolia", "≤ 0.001 ETH · ≤ 100 gwei", c ? `Sponsor · ${formatNear(c.mpc_deposit, 2)} NEAR MPC fee` : "…"],
             ].map(([k, label, limit, fee]) => (
               <tr key={k}>
                 <td>
@@ -63,19 +144,6 @@ export default function Permissions() {
                 <td className="r">{c ? c.allowed_actions.includes(k) ? <Status tone="ok">Allowed</Status> : <Status tone="bad">Off</Status> : <Skeleton w={60} />}</td>
               </tr>
             ))}
-            <tr className="denied">
-              <td>
-                <b>Any other call</b>
-                <small className="block">transfers, keys, upgrades, arbitrary hashes</small>
-              </td>
-              <td>—</td>
-              <td>—</td>
-              <td className="r">
-                <Status tone="bad">
-                  <X size={11} /> Blocked
-                </Status>
-              </td>
-            </tr>
           </tbody>
         </table>
       </section>
@@ -138,8 +206,8 @@ export default function Permissions() {
           <p className="muted">Start the relayer to sponsor actions. Reads keep working without it.</p>
         )}
         <p className="card-foot">
-          Paid by <span className="mono">{tong.health?.relayerId ?? "the relayer"}</span>. It rejects bad signatures and stale nonces before
-          spending anything.
+          Paid by <span className="mono">{tong.health?.relayerId ?? "the relayer"}</span>. It checks the signature, then lets the contract decide
+          everything else, so a refusal is visible on chain.
         </p>
       </section>
 
@@ -150,7 +218,8 @@ export default function Permissions() {
         <ul className="checks">
           {[
             "Signatures name one action, one nonce",
-            "Nonce is consumed before any call",
+            "Policy is checked on chain before any call",
+            "App deposits come from your account, never the sponsor",
             "Your account cannot be upgraded",
             "Ethereum tx is built on chain, never a raw hash",
             "Derivation path tong:sepolia:11155111",

@@ -29,10 +29,24 @@ export async function installQaWallet(context, wallet, { name = "QA test wallet"
     ({ address, name, icon, approvalSheet }) => {
       // Optional wallet-style "Sign message" sheet (QA/film signer only; never part of the production bundle).
       // It shows the exact typed message and waits for Approve or Reject before the key signs.
-      const WORDS = {
-        link: "Create my NEAR account (no access keys)",
-        set_note: "Save a note on my NEAR account",
-        sign_sepolia: "Ask NEAR to sign a Sepolia transfer with Chain Signatures",
+      const near = (y) => {
+        const v = BigInt(y);
+        const w = v / 10n ** 24n;
+        const f = (v % 10n ** 24n).toString().padStart(24, "0").slice(0, 4).replace(/0+$/, "");
+        return `${w}${f ? "." + f : ""} NEAR`;
+      };
+      const words = (m) => {
+        let d = {};
+        try { d = JSON.parse(m.data); } catch {}
+        const dom = m.domain.split(":").pop();
+        if (m.action === "link") return `Create my NEAR account ${d.name}.${dom} (no access keys)`;
+        if (m.action === "set_note") return "Save a note on my NEAR account";
+        if (m.action === "call") return BigInt(d.deposit || "0") > 1n ? `Call ${d.contract} → ${d.method}, paying ${near(d.deposit)} from my NEAR account` : `Call ${d.contract} → ${d.method}`;
+        if (m.action === "send_near") return `Send ${near(d.amount)} to ${d.to}`;
+        if (m.action === "grant") return `Allow ${d.contract} to use ${d.methods.join(", ")} for ${d.days} days, ${BigInt(d.max_deposit) ? "at most " + near(d.max_deposit) + " a call" : "no NEAR attached"}`;
+        if (m.action === "revoke") return `Remove ${d.contract}'s permission`;
+        if (m.action === "sign_sepolia") return "Ask NEAR to sign a Sepolia transfer with Chain Signatures";
+        return m.action;
       };
       const sheet = (data) =>
         new Promise((resolve, reject) => {
@@ -61,7 +75,7 @@ export async function installQaWallet(context, wallet, { name = "QA test wallet"
             return r;
           };
           body.append(chip("Signer", address.slice(0, 8) + "…" + address.slice(-6)), chip("Wallet network", "Sepolia (signs off-chain, no gas)"), chip("Verified by", "NEAR testnet"));
-          const plain = el("div", "margin:14px 0 8px;padding:11px 13px;border-radius:12px;background:#fff4ec;color:#7a3410;font-size:14px;font-weight:600", WORDS[m.action] ?? m.action);
+          const plain = el("div", "margin:14px 0 8px;padding:11px 13px;border-radius:12px;background:#fff4ec;color:#7a3410;font-size:14px;font-weight:600", words(m));
           body.append(plain);
           const box = el("div", "border:1px solid #e7e0da;border-radius:12px;padding:10px 12px;background:#fcfbfa;font:12px/1.5 ui-monospace,Menlo,monospace;color:#2b2622;max-height:250px;overflow:auto;word-break:break-all");
           const fields = [["domain", m.domain], ["wallet", m.wallet], ["action", m.action], ["data", m.data], ["nonce", m.nonce], ["deadline", m.deadline]];

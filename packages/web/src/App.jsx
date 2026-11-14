@@ -10,14 +10,17 @@ import CrossChain from "./pages/CrossChain.jsx";
 import Activity from "./pages/Activity.jsx";
 import Permissions from "./pages/Permissions.jsx";
 import Developers from "./pages/Developers.jsx";
+import Wrap from "./pages/Wrap.jsx";
+import Demo from "./pages/Demo.jsx";
 
 const PAGES = {
   "#/app": [Dashboard, "Account", "Your NEAR identity, from the wallet you already have"],
   "#/app/apps": [Apps, "Apps", "NEAR apps you can use with your wallet"],
+  "#/app/apps/wrap": [Wrap, "Wrapped NEAR", "A real NEAR app, used from your wallet, inside your limits"],
   "#/app/act": [Act, "Act on NEAR", "Sign one action. Your NEAR account does exactly that."],
   "#/app/sign": [CrossChain, "Cross-chain", "Sign for Ethereum with NEAR Chain Signatures"],
   "#/app/activity": [Activity, "Activity", "Every action, with its receipt"],
-  "#/app/permissions": [Permissions, "Permissions", "What Tong is allowed to do, read live from the contract"],
+  "#/app/permissions": [Permissions, "Permissions", "Your account's limits, enforced on chain by the Tong contract"],
   "#/app/developers": [Developers, "Developers", "Add wallet sign-in to your NEAR app"],
 };
 
@@ -40,6 +43,7 @@ function useRoute() {
 function Router() {
   const route = useRoute();
   if (route === "#/connect") return <Connect />;
+  if (route === "#/demo") return <Demo />;
   const page = PAGES[route];
   if (page) {
     const [Page, title, subtitle] = page;

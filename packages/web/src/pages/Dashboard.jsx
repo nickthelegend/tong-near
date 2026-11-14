@@ -72,6 +72,7 @@ export default function Dashboard() {
             </span>
             <span>{keys === undefined ? "…" : keys === null ? "—" : keys} access keys</span>
             <span>{id ? `${id.nonce} signed actions` : "…"}</span>
+            <span>{id?.policy ? `${id.policy.grants.length} app${id.policy.grants.length === 1 ? "" : "s"} allowed` : "…"}</span>
             {id && <Ext href={nearAccount(id.account_id)}>NearBlocks</Ext>}
           </div>
           <div className="hc-actions">
@@ -87,11 +88,11 @@ export default function Dashboard() {
               </span>
               Sign
             </a>
-            <a href="#/app/apps">
+            <a href="#/app/apps/wrap">
               <span>
                 <LayoutGrid size={19} />
               </span>
-              Apps
+              Wrap
             </a>
             <a href="#/app/activity">
               <span>
@@ -152,6 +153,14 @@ export default function Dashboard() {
                 <small className="mono">{id ? shortAccount(id.account_id) : "…"}</small>
               </span>
               <span className="num">{tong.account ? `${formatNear(tong.account.amount, 3)} NEAR` : "…"}</span>
+            </li>
+            <li className="list-row">
+              <span className="w-ico w-near">W</span>
+              <span className="grow">
+                <b>Wrapped NEAR</b>
+                <small className="mono">wrap.testnet</small>
+              </span>
+              <span className="num">{tong.wnear != null ? `${formatNear(tong.wnear, 4)} wNEAR` : "…"}</span>
             </li>
             <li className="list-row">
               <span className="w-ico w-eth">

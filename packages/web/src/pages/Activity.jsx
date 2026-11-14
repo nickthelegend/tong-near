@@ -1,13 +1,15 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Check, Globe2, KeyRound, PenLine, Radio, RefreshCw, X } from "lucide-react";
+import { Check, Globe2, KeyRound, PenLine, Radio, RefreshCw, X, Send, LayoutGrid } from "lucide-react";
 import { useTongApp } from "../lib/tong.jsx";
 import { accountActivity, nearTx, sepoliaTx, short, shortAccount, timeAgo, nearAccount, txReceipt, formatNear } from "../lib/chain.js";
 import { NeedWallet } from "../components/Shell.jsx";
 import { Empty, Ext, Skeleton, Status, cx, ErrorNote, Spinner } from "../components/ui.jsx";
 
-const ICON = { link: KeyRound, note: PenLine, signature: Globe2, broadcast: Radio, transfer: Check };
+const ICON = { link: KeyRound, note: PenLine, signature: Globe2, broadcast: Radio, transfer: Send, app: LayoutGrid };
 const FILTERS = [
   ["all", "All"],
+  ["app", "Apps"],
+  ["transfer", "Sends"],
   ["link", "Account"],
   ["note", "Notes"],
   ["signature", "Signatures"],
@@ -115,10 +117,10 @@ export default function Activity() {
 
   // Session entries not yet indexed by NearBlocks, plus Sepolia broadcasts.
   const indexed = new Set((rows ?? []).map((r) => r.hash));
-  const kindOf = { link: "link", set_note: "note", sign_sepolia: "signature", broadcast: "broadcast" };
+  const kindOf = { link: "link", set_note: "note", sign_sepolia: "signature", broadcast: "broadcast", call: "app", grant: "app", revoke: "app", send_near: "transfer" };
   const pending = tong.activity
     .filter((a) => !indexed.has(a.hash))
-    .map((a) => ({ hash: a.hash, at: a.at, ok: a.ok, label: a.label, kind: kindOf[a.kind] ?? a.kind, chain: a.chain, pending: a.chain !== "sepolia" }));
+    .map((a) => ({ hash: a.hash, at: a.at, ok: a.ok, label: a.label, kind: kindOf[a.kind] ?? a.kind, chain: a.chain, reason: a.reason, pending: a.chain !== "sepolia" && a.ok }));
   const all = [...pending, ...(rows ?? [])].filter((r) => filter === "all" || r.kind === filter);
 
   return (
@@ -175,7 +177,7 @@ export default function Activity() {
                         <b>{r.label}</b>
                       </span>
                     </td>
-                    <td>{r.ok ? r.pending ? <Status tone="warm">Indexing</Status> : <Status tone="ok">Success</Status> : <Status tone="bad"><X size={11} /> Failed</Status>}</td>
+                    <td title={r.reason ?? ""}>{r.ok ? r.pending ? <Status tone="warm">Indexing</Status> : <Status tone="ok">Success</Status> : r.reason ? <Status tone="bad"><X size={11} /> Refused by policy</Status> : <Status tone="bad"><X size={11} /> Failed</Status>}</td>
                     <td>{sep ? "Sepolia" : "NEAR testnet"}</td>
                     <td>
                       <span onClick={(e) => e.stopPropagation()}>

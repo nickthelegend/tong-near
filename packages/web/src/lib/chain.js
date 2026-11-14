@@ -78,7 +78,32 @@ export async function accessKeys(id) {
 }
 export const getConfig = () => view(CONTRACT_ID, "get_config");
 export const getIdentity = (wallet) => view(CONTRACT_ID, "get_identity", { wallet });
-export const deriveAccount = (wallet) => view(CONTRACT_ID, "derive_account", { wallet });
+export const nameAvailable = (name) => view(CONTRACT_ID, "name_available", { name });
+export const accountFor = (name) => view(CONTRACT_ID, "account_for", { name });
+export const ownerOf = (accountId) => view(CONTRACT_ID, "owner_of", { account_id: accountId });
+export const WRAP = "wrap.testnet";
+export const GUESTBOOK = "guestbook.near-examples.testnet";
+export async function wnearBalance(accountId) {
+  return view(WRAP, "ft_balance_of", { account_id: accountId });
+}
+export async function guestbookLatest(limit = 6) {
+  const total = Number(await view(GUESTBOOK, "total_messages", {}));
+  const from = Math.max(0, total - limit);
+  const rows = await view(GUESTBOOK, "get_messages", { from_index: String(from), limit: String(limit) });
+  return { total, rows: rows.map((r, i) => ({ ...r, index: from + i })).reverse() };
+}
+/** Today's policy usage, rolled over at the UTC day boundary exactly like the contract does. */
+export function policyToday(policy) {
+  if (!policy) return null;
+  const today = BigInt(Math.floor(Date.now() / 86_400_000));
+  const spent = BigInt(policy.day) === today ? BigInt(policy.spent_today) : 0n;
+  return { spent, cap: BigInt(policy.daily_cap), left: BigInt(policy.daily_cap) - spent, sendCap: BigInt(policy.send_cap) };
+}
+export function grantFor(policy, contract) {
+  const g = policy?.grants?.find((x) => x.contract === contract);
+  if (!g) return null;
+  return { ...g, expired: Number(g.expires_at) * 1000 <= Date.now() };
+}
 export const childState = (id) => view(id, "get_state");
 export async function nearGasPrice() {
   return (await rpc("gas_price", [null])).gas_price;
@@ -113,6 +138,11 @@ const METHOD_LABEL = {
   set_note: "Note saved on NEAR",
   sign_sepolia: "Chain Signature requested",
   sign: "MPC signing request",
+  call_app: "App call",
+  near_deposit: "Wrapped NEAR",
+  near_withdraw: "Unwrapped NEAR",
+  add_message: "Guestbook message",
+  send_near: "NEAR sent",
 };
 async function nearblocks(path) {
   const r = await fetch(`${NEARBLOCKS_API}${path}`, { signal: AbortSignal.timeout(20000) });
@@ -136,8 +166,8 @@ export async function accountActivity(accountId) {
   }
   return [...byTx.values()]
     .map((t) => {
-      const key = ["new", "sign_sepolia", "set_note", "sign"].find((m) => t.methods.includes(m));
-      const kind = key === "new" ? "link" : key === "set_note" ? "note" : key ? "signature" : "transfer";
+      const key = ["new", "near_deposit", "near_withdraw", "add_message", "send_near", "sign_sepolia", "set_note", "sign", "call_app"].find((m) => t.methods.includes(m));
+      const kind = key === "new" ? "link" : key === "set_note" ? "note" : ["near_deposit", "near_withdraw", "add_message", "call_app"].includes(key) ? "app" : key === "send_near" ? "transfer" : key ? "signature" : "transfer";
       return { ...t, kind, label: METHOD_LABEL[key] ?? "Account receipt" };
     })
     .sort((a, b) => b.at - a.at);

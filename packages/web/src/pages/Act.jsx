@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Check, ExternalLink, PenLine, ShieldCheck } from "lucide-react";
+import { Check, ExternalLink, PenLine, ShieldCheck, ShieldAlert, Send } from "lucide-react";
+import { parseNear, ACCOUNT_RE } from "@tong/sdk";
 import { useTongApp } from "../lib/tong.jsx";
-import { CONTRACT_ID, nearTx, shortAccount, walletLabel } from "../lib/chain.js";
+import { CONTRACT_ID, nearTx, shortAccount, walletLabel, formatNear, policyToday, DEPLOYMENT } from "../lib/chain.js";
 import { NeedWallet } from "../components/Shell.jsx";
-import { Spinner, Steps, ErrorNote, Status } from "../components/ui.jsx";
+import { Spinner, Steps, ErrorNote, Status, Outcome, Meter, cx } from "../components/ui.jsx";
 
 const enc = new TextEncoder();
 export const ACT_STEPS = [
@@ -26,7 +27,135 @@ function Countdown({ deadline }) {
   );
 }
 
+const nearFmt = (v) => `${formatNear(v, 3)} NEAR`;
+
+function SendNear() {
+  const tong = useTongApp();
+  const [to, setTo] = useState(DEPLOYMENT.relayer_id);
+  const [amount, setAmount] = useState("0.05");
+  const [error, setError] = useState(null);
+  const today = policyToday(tong.identity?.policy);
+  const task = tong.task?.action === "send_near" ? tong.task : null;
+  const working = task && !task.error && !["done", "refused"].includes(task.phase);
+  let yocto = null;
+  try {
+    yocto = parseNear(amount);
+  } catch {
+    yocto = null;
+  }
+  const overCap = today && yocto != null && yocto > today.sendCap;
+  const overDay = today && yocto != null && yocto > today.left;
+  async function submit() {
+    setError(null);
+    try {
+      await tong.sendNear(to.trim(), String(yocto), `Send ${amount} NEAR to ${to.trim()}`);
+    } catch (e) {
+      if (!e.refused) setError(e.message);
+    }
+  }
+  return (
+    <div className="act-grid">
+      <section className="card act-compose">
+        <div className="app-chip">
+          <span className="app-mono tone-coral">↗</span>
+          <span>
+            <b>Send NEAR</b>
+            <small>From your NEAR account's own balance</small>
+          </span>
+          <Status tone="ok">Allowed</Status>
+        </div>
+        <label htmlFor="to" className="field-label">
+          To (any NEAR account)
+        </label>
+        <input id="to" className="text-input mono" value={to} disabled={working} onChange={(e) => setTo(e.target.value.toLowerCase())} />
+        <label htmlFor="amt2" className="field-label" style={{ marginTop: 12 }}>
+          Amount
+        </label>
+        <div className="amount-row">
+          <input id="amt2" inputMode="decimal" value={amount} disabled={working} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))} />
+          <span className="amount-unit">NEAR</span>
+        </div>
+        {today && yocto != null && (
+          <div className={cx("policy-hint", (overCap || overDay) && "over")}>
+            {overCap || overDay ? <ShieldAlert size={16} /> : <ShieldCheck size={16} />}
+            <span>
+              {overCap
+                ? `Over your ${nearFmt(today.sendCap)} per-transfer limit. The contract will refuse it on chain.`
+                : overDay
+                  ? `Would pass today's ${nearFmt(today.cap)} allowance. The contract will refuse it.`
+                  : `Within your limits: ${nearFmt(today.sendCap)} per transfer, ${nearFmt(today.left)} left today.`}
+            </span>
+          </div>
+        )}
+        {task && !task.error && task.phase !== "refused" && <Steps steps={ACT_STEPS} current={task.phase} />}
+        <button type="button" className={cx("btn btn-lg btn-block", overCap || overDay ? "btn-coral" : "btn-dark")} disabled={working || !yocto || !ACCOUNT_RE.test(to.trim()) || !tong.canSign} onClick={submit}>
+          {working ? <Spinner /> : <Send size={18} />}
+          {working ? tong.phases[task.phase] + "…" : overCap || overDay ? "Sign anyway: let NEAR decide" : `Sign & send ${amount} NEAR`}
+        </button>
+        {error && <ErrorNote onClose={() => setError(null)}>{error}</ErrorNote>}
+        <Outcome task={task} title={`Sent ${amount} NEAR`}>
+          <p>
+            Your account now holds <b>{tong.account ? `${formatNear(tong.account.amount, 4)} NEAR` : "…"}</b>
+          </p>
+        </Outcome>
+      </section>
+      <section className="card sign-preview">
+        <div className="card-head">
+          <h3>Your limits</h3>
+          <span className="chip">On chain, in {CONTRACT_ID}</span>
+        </div>
+        {today ? (
+          <>
+            <Meter label="Spent today" value={today.spent} max={today.cap} fmt={nearFmt} />
+            <dl className="kv">
+              <div>
+                <dt>per transfer</dt>
+                <dd>{nearFmt(today.sendCap)}</dd>
+              </div>
+              <div>
+                <dt>daily allowance</dt>
+                <dd>{nearFmt(today.cap)}, resets 00:00 UTC</dd>
+              </div>
+              <div>
+                <dt>balance</dt>
+                <dd>{tong.account ? nearFmt(tong.account.amount) : "…"}</dd>
+              </div>
+            </dl>
+          </>
+        ) : (
+          <p className="muted">Create your account to see its limits.</p>
+        )}
+        <div className="exec-box">
+          <span>Runs as</span>
+          <b className="mono">{shortAccount(tong.identity?.account_id)}</b>
+          <span>sends to</span>
+          <b className="mono">{to || "…"}</b>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export default function Act() {
+  const [tab, setTab] = useState("send");
+  return (
+    <NeedWallet>
+      <div className="seg" role="tablist" style={{ marginBottom: 16 }}>
+        {[
+          ["send", "Send NEAR"],
+          ["note", "Signed note"],
+        ].map(([k, l]) => (
+          <button key={k} type="button" role="tab" aria-selected={tab === k} className={cx(tab === k && "on")} onClick={() => setTab(k)}>
+            {l}
+          </button>
+        ))}
+      </div>
+      {tab === "send" ? <SendNear /> : <NoteCard />}
+    </NeedWallet>
+  );
+}
+
+function NoteCard() {
   const tong = useTongApp();
   const [note, setNote] = useState("gm NEAR — signed from my Ethereum wallet.");
   const [error, setError] = useState(null);
@@ -44,7 +173,7 @@ export default function Act() {
     }
   }
   return (
-    <NeedWallet>
+    <>
       <div className="act-grid">
         <section className="card act-compose">
           <div className="app-chip">
@@ -136,6 +265,6 @@ export default function Act() {
           )}
         </section>
       </div>
-    </NeedWallet>
+    </>
   );
 }

@@ -40,7 +40,11 @@ export function useTong(options) {
     ...state,
     connector,
     connect: (kind) => run(() => connector.connect(kind)),
-    link: () => run(() => connector.link()),
+    link: (name) => run(() => connector.link(name)),
+    call: (contract, method, args, deposit) => run(() => connector.call(contract, method, args, deposit)),
+    sendNear: (to, amount) => run(() => connector.sendNear(to, amount)),
+    grant: (contract, methods, maxDeposit, days) => run(() => connector.grant(contract, methods, maxDeposit, days)),
+    revoke: (contract) => run(() => connector.revoke(contract)),
     setNote: (note) => run(() => connector.setNote(note)),
     signSepolia: (t) => run(() => connector.signSepolia(t)),
     disconnect: () => {

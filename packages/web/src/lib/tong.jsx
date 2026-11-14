@@ -10,7 +10,7 @@ import {
 import {
   CONTRACT_ID,
   getIdentity,
-  deriveAccount,
+  wnearBalance,
   viewAccount,
   childState,
   sepoliaSnapshot,
@@ -97,6 +97,7 @@ const PHASES = {
   wallet: "Waiting for your wallet",
   relay: "Executing on NEAR",
   done: "Confirmed",
+  refused: "Refused on chain",
 };
 
 export function TongProvider({ children }) {
@@ -105,7 +106,7 @@ export function TongProvider({ children }) {
   const [sessionWallet, setSessionWallet] = useState(null); // wallet with a live signer in this tab
   const connectorRef = useRef(null);
   const [identity, setIdentity] = useState(undefined); // undefined = loading, null = not linked
-  const [predicted, setPredicted] = useState(null);
+  const [wnear, setWnear] = useState(null);
   const [account, setAccount] = useState(null);
   const [state, setState] = useState(null);
   const [derived, setDerived] = useState(null);
@@ -147,16 +148,21 @@ export function TongProvider({ children }) {
       const id = await getIdentity(active);
       setIdentity(id);
       if (!id) {
-        setPredicted(await deriveAccount(active));
+        setWnear(null);
         setAccount(null);
         setState(null);
         setDerived(null);
         setEth(null);
         return;
       }
-      const [acct, st] = await Promise.all([viewAccount(id.account_id), id.ready ? childState(id.account_id) : null]);
+      const [acct, st, wn] = await Promise.all([
+        viewAccount(id.account_id),
+        id.ready ? childState(id.account_id) : null,
+        id.ready ? wnearBalance(id.account_id).catch(() => null) : null,
+      ]);
       setAccount(acct);
       setState(st);
+      setWnear(wn);
       if (id.ready) {
         const addr = await deriveSepoliaAddress(id.account_id);
         setDerived(addr);
@@ -172,6 +178,7 @@ export function TongProvider({ children }) {
   }, [active]);
   useEffect(() => {
     setIdentity(undefined);
+    setWnear(null);
     setAccount(null);
     setState(null);
     setDerived(null);
@@ -238,6 +245,13 @@ export function TongProvider({ children }) {
         return result;
       } catch (e) {
         const message = /user rejected|denied|4001/i.test(e.message) ? "You declined the request in your wallet." : e.message;
+        if (e.refused) {
+          // Landed on NEAR and the contract said no: keep the receipt, it is the proof.
+          setTask((t) => ({ ...(t ?? { action }), phase: "refused", error: message, refused: { txHash: e.txHash, reason: message } }));
+          log({ hash: e.txHash, label: `Refused: ${label}`, kind: action, wallet: active, ok: false, reason: message });
+          refreshHealth();
+          throw Object.assign(new Error(message), { refused: true, txHash: e.txHash });
+        }
         setTask((t) => ({ ...(t ?? { action }), error: message }));
         throw new Error(message);
       }
@@ -245,11 +259,36 @@ export function TongProvider({ children }) {
     [active, log, refreshHealth],
   );
 
-  const link = useCallback(async () => {
-    const out = await run("link", {}, "Account created");
-    await refresh();
-    return out;
-  }, [run, refresh]);
+  const link = useCallback(
+    async (name) => {
+      const out = await run("link", { name }, `Account ${name} created`);
+      await refresh();
+      return out;
+    },
+    [run, refresh],
+  );
+  const after = useCallback(
+    async (p) => {
+      try {
+        return await p;
+      } finally {
+        await refresh();
+      }
+    },
+    [refresh],
+  );
+  const callApp = useCallback(
+    (contract, method, args, deposit, label) =>
+      after(run("call", { contract, method, args: JSON.stringify(args ?? {}), deposit: String(deposit ?? "0") }, label)),
+    [run, after],
+  );
+  const sendNear = useCallback((to, amount, label) => after(run("send_near", { to, amount: String(amount) }, label)), [run, after]);
+  const grant = useCallback(
+    (contract, methods, maxDeposit, days, label) =>
+      after(run("grant", { contract, methods, max_deposit: String(maxDeposit), days }, label ?? `Allowed ${contract}`)),
+    [run, after],
+  );
+  const revoke = useCallback((contract) => after(run("revoke", { contract }, `Removed ${contract}`)), [run, after]);
 
   const setNote = useCallback(
     async (note) => {
@@ -321,7 +360,7 @@ export function TongProvider({ children }) {
       canSign,
       sessionWallet,
       identity,
-      predicted,
+      wnear,
       account,
       state,
       derived,
@@ -342,12 +381,16 @@ export function TongProvider({ children }) {
       refresh,
       refreshHealth,
       link,
+      callApp,
+      sendNear,
+      grant,
+      revoke,
       setNote,
       prepareTransfer,
       signSepolia,
       broadcast,
     }),
-    [wallets, active, activeEntry, canSign, sessionWallet, identity, predicted, account, state, derived, eth, health, healthError, readError, task, activity, signed, connect, switchTo, forget, disconnect, refresh, refreshHealth, link, setNote, prepareTransfer, signSepolia, broadcast],
+    [wallets, active, activeEntry, canSign, sessionWallet, identity, wnear, account, state, derived, eth, health, healthError, readError, task, activity, signed, connect, switchTo, forget, disconnect, refresh, refreshHealth, link, callApp, sendNear, grant, revoke, setNote, prepareTransfer, signSepolia, broadcast],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

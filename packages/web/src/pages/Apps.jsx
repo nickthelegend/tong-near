@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { ArrowRight, ArrowUpRight, Search } from "lucide-react";
 import { useTongApp } from "../lib/tong.jsx";
-import { nearAccount, CONTRACT_ID } from "../lib/chain.js";
+import { nearAccount, CONTRACT_ID, grantFor } from "../lib/chain.js";
 import { Spinner, Status, cx } from "../components/ui.jsx";
 
 const LIVE = [
-  { name: "Tong Notes", cat: "Profile", tone: "coral", desc: "Write a signed note to your NEAR account. The note lives in your account's own state.", does: "set_note · up to 256 bytes", href: "#/app/act", cta: "Open" },
+  { name: "Wrapped NEAR", cat: "DeFi · wrap.testnet", tone: "ink", desc: "Wrap NEAR into wNEAR, the token NEAR DEXs trade. Allowed by default, at most 0.2 NEAR a call.", does: "near_deposit · near_withdraw", href: "#/app/apps/wrap", cta: "Open", grant: "wrap.testnet" },
+  { name: "NEAR Guestbook", cat: "Social · near-examples", tone: "sand", desc: "A third-party dApp built with the Tong SDK. It asks your account for one permission, then posts.", does: "add_message · needs your grant", href: "#/demo", cta: "Open dApp", grant: "guestbook.near-examples.testnet" },
+  { name: "Send NEAR", cat: "Payments", tone: "coral", desc: "Send NEAR to any account from your own balance, inside your per-transfer and daily limits.", does: "send_near · ≤ 0.1 NEAR", href: "#/app/act", cta: "Open" },
+  { name: "Tong Notes", cat: "Profile", tone: "pearl", desc: "Write a signed note to your NEAR account. The note lives in your account's own state.", does: "set_note · up to 256 bytes", href: "#/app/act", cta: "Open" },
   { name: "Chain Signatures", cat: "Cross-chain", tone: "ink", desc: "NEAR's MPC network signs Sepolia transfers from an address your account owns.", does: "sign_sepolia · ≤ 0.001 ETH", href: "#/app/sign", cta: "Open" },
   { name: "NEAR Intents 1Click", cat: "Bridge quote", tone: "sand", desc: "Price 10 USDC from Ethereum to NEAR on the live 1Click API. Dry quote: no deposit address, no funds move.", does: "read-only · mainnet dry quote", quote: true },
   { name: "NearBlocks", cat: "Explorer", tone: "pearl", desc: "Every receipt your NEAR account produces, verified by an independent explorer.", does: "read-only", explorer: true },
@@ -68,7 +71,11 @@ export default function Apps() {
               <article key={a.name} className="app-card">
                 <div className="app-top">
                   <Mono name={a.name} tone={a.tone} />
-                  <Status tone="ok">Live</Status>
+                  {a.grant && tong.identity?.ready ? (
+                    grantFor(tong.identity.policy, a.grant) ? <Status tone="ok">Allowed</Status> : <Status tone="warm">Asks permission</Status>
+                  ) : (
+                    <Status tone="ok">Live</Status>
+                  )}
                 </div>
                 <h3>{a.name}</h3>
                 <small className="app-cat">{a.cat}</small>
@@ -111,7 +118,7 @@ export default function Apps() {
       {filter !== "live" && (
         <>
           <h2 className="sec-title">
-            Next: any NEAR app <small>Needs Tong's app-call permission, not in the v1 policy yet.</small>
+            Next screens <small>Any NEAR contract already works through a signed grant; these get their own screens next.</small>
           </h2>
           <div className="apps-grid soon">
             {ROADMAP.filter(match).map((a) => (
