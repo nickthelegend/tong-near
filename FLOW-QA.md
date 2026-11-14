@@ -1,3 +1,39 @@
+# Tong flow QA, November 14, 2026 (v2 factory + film v8)
+
+Factory: `tongid.testnet`. It is locked, with zero keys; the lock transaction is `H6cmi5CALSeEFywLVwPeSBQY9QJ2rocPbSnsWJNWMa12`.
+
+| Check | Result |
+| --- | --- |
+| Unit tests | `pnpm test`: 11 passed, 0 failed |
+| WASM sandbox | `pnpm test:sandbox`: 24 on-chain checks passed |
+| Web build | `pnpm build` passes |
+| Script rehearsal (`scripts/demo-v2.mjs`) | 5 successes and 2 on-chain refusals; see [deployments/v2/rehearsal.json](deployments/v2/rehearsal.json) |
+| UI rehearsal (`sam.tongid.testnet`) | link `5bi5jnFwawkpRWaymXJPLHtc7jhNBwoBQDZr6UAL8kL9`, wrap `F5CQcZZc7r1XyMBiRvpuTpweLooMkCkh7KfrKvjh8x3z`, refused `6XXFq12o5mAaQdEe1jpiVobZkFtNeLtVWQPTnfsX6Fph`, send `3GyV2MxuMMRuwDDYFw2N3h3jutTT1Pofgt6octLMyHvP`, grant `Aiqz49wCf75GQx25KmBxJr985xZ5VwpLcC8pu1X8sWW7`, guestbook `FkHaj41s5uVuWSkn5YJsh62YJhCWVp3z3ddyttNsP21r` |
+| Film take 1 (`maya.tongid.testnet`, rejected: app capture cropped) | link `6vU6WHhwThgFYLLtg4UfHxCmqF68GF9j43sTrD5roNeN`, wrap `BsagCsYgQgttLmTZ9rAHoALXDUonTqYcK5Z9fVVJECgm`, refused `4vQ9GkBXS2SvqQiWJkxL34N5giq1tLQS6DqpWANSYsqi`, send `9K7zuwiBngaGLLL2GRYnLzEoPAcJ8s7j2uDX5nvjTasf`, grant `4YN7hjarc38a1WgFBTaKLg84RLpbNMyi7w8WQMggUmie`, guestbook `DmCsA1FVcjZ2KGq43SLKkS6KyT6Hd5vB6t7fdjRuF2zm`, Chain Signature `GUi8rctFZytrk8Mzvy7NBswMeRNHw5JZQRMenRt1su2v` |
+
+**Film v8 final take** (`mira.tongid.testnet`, fresh scripted EVM wallet `0x16f8a7d6508cfad8b0eab6f0f3b720ea6d658bab`):
+
+| Step | Transaction |
+| --- | --- |
+| Link | [FzYX1kTe…](https://testnet.nearblocks.io/txns/FzYX1kTe8bogcANzV6nbtUmnAuEn1rjVqfj5HBvv59nd) |
+| Wrap 0.1 NEAR | [8Tj3YmCq…](https://testnet.nearblocks.io/txns/8Tj3YmCqqGdY5PL5b7drENyfhFNnnZwAkTYzMoij4daD) |
+| **Refused** wrap of 0.5 NEAR | [GiLBrQn7…](https://testnet.nearblocks.io/txns/GiLBrQn7U2V3ivUQwHpMWsJEX7QhUJjrLsYtkFMqyN5p) |
+| Send 0.05 NEAR | [3ByxADT7…](https://testnet.nearblocks.io/txns/3ByxADT7pAr7MJRymsZ7SUesJU8EEMbasj3aLncGgNZe) |
+| Guestbook grant | [1iim1LzE…](https://testnet.nearblocks.io/txns/1iim1LzE643vnCerjRLhY9ynmj7VJM89DBAG4XCV5eQ) |
+| Guestbook post | [BZ1ndRje…](https://testnet.nearblocks.io/txns/BZ1ndRjeEbxc4sAEnmqfpS84T71cQF9ij9BknQAmUHY9) |
+| Chain Signature | [6ha8veMV…](https://testnet.nearblocks.io/txns/6ha8veMVhSH3bGHh7R9T8pFDMT18XRhEpKaCyUXHJgk) |
+
+- **Sepolia:** the Chain Signature recovers to `0x21Fc88c5473e6A2e4e3725452316Ee2d21004963`. That address holds 0 wei,
+  and so does `0x1b5e316144D8aFB875b4C8Ab751f83F463E4AFa8` (checked Nov 14, publicnode). The transfer was signed, not
+  broadcast.
+- **Sponsor:** the relayer was topped up with 2 × 9.9 test NEAR from fresh faucet accounts
+  ([relayer-topups.json](deployments/v2/relayer-topups.json)). For the takes it ran with `TONG_DAILY_MAX_NEAR=20`; the
+  default stays 4 and the hard cap is now 25.
+- **Wallet:** approvals come from the Playwright-injected EIP-6963 "QA test wallet", whose key stays in Node. This is
+  not a MetaMask or Phantom extension approval.
+
+---
+
 # Tong flow QA — November 13, 2026 (multi-screen rebuild + film v5)
 
 New web app (hash routes `#/`, `#/connect`, `#/app`, `#/app/apps`, `#/app/act`, `#/app/sign`, `#/app/activity`,

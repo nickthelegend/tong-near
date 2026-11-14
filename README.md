@@ -75,7 +75,7 @@ Not supported yet:
 
 ## Inspect the live proof
 
-v2 factory: [`tongid.testnet`](https://testnet.nearblocks.io/address/tongid.testnet), deployed in [DBDzGrsX…](https://testnet.nearblocks.io/txns/DBDzGrsX3nZbXQ5zUfKsXjbxnfet5CU4FEhJg2arcnqQ). The film's own transactions are listed in [FLOW-QA.md](FLOW-QA.md).
+v2 factory: [`tongid.testnet`](https://testnet.nearblocks.io/address/tongid.testnet), deployed in [DBDzGrsX…](https://testnet.nearblocks.io/txns/DBDzGrsX3nZbXQ5zUfKsXjbxnfet5CU4FEhJg2arcnqQ). The film's own transactions (account `mira.tongid.testnet`, including the on-chain refusal [GiLBrQn7…](https://testnet.nearblocks.io/txns/GiLBrQn7U2V3ivUQwHpMWsJEX7QhUJjrLsYtkFMqyN5p)) are listed in [FLOW-QA.md](FLOW-QA.md). Factory locked in [H6cmi5CA…](https://testnet.nearblocks.io/txns/H6cmi5CALSeEFywLVwPeSBQY9QJ2rocPbSnsWJNWMa12): zero access keys.
 
 | Evidence (v2 rehearsal, Nov 14) | Result |
 | --- | --- |
