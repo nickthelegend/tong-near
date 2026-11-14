@@ -1,5 +1,8 @@
-use near_sdk::{env, near, require, AccountId, Gas, NearToken, PanicOnDefault, Promise, serde_json::json, json_types::U64};
+use near_sdk::{env, near, require, AccountId, Gas, NearToken, PanicOnDefault, Promise, serde_json::json, json_types::{U64, U128}};
 
+// A Tong account: a named NEAR account with zero access keys. Only its controller (the locked Tong
+// factory) can call it, and the factory only does so after checking the wallet's signature and the
+// account's on-chain policy (app allowlist, deposit caps, daily cap, expiry, one-use nonce).
 #[near(contract_state)]
 #[derive(PanicOnDefault)]
 pub struct TongAccount { controller: AccountId, note: String }
@@ -16,13 +19,24 @@ impl TongAccount {
         Self { controller, note: String::new() }
     }
     pub fn get_state(&self) -> near_sdk::serde_json::Value {
-        json!({"controller":self.controller,"note":self.note,"chain_id":11155111,"path":"tong:sepolia:11155111"})
+        json!({"controller":self.controller,"note":self.note,"chain_id":11155111,"path":"tong:sepolia:11155111","version":"2"})
     }
     pub fn set_note(&mut self, note: String) -> near_sdk::serde_json::Value {
         self.authorize();
         require!(note.len() <= 256, "note too long");
         self.note = note;
         json!({"ok":true,"account_id":env::current_account_id(),"note":self.note})
+    }
+    /// Calls an app contract from this account, attaching `deposit` from this account's own balance.
+    /// The factory has already checked the app, method and amount against the policy.
+    pub fn call_app(&mut self, receiver: AccountId, method: String, args: String, deposit: U128) -> Promise {
+        self.authorize();
+        Promise::new(receiver).function_call(method, args.into_bytes(), NearToken::from_yoctonear(deposit.0), Gas::from_tgas(60))
+    }
+    /// Sends NEAR from this account's own balance. The factory has already checked the cap.
+    pub fn send_near(&mut self, to: AccountId, amount: U128) -> Promise {
+        self.authorize();
+        Promise::new(to).transfer(NearToken::from_yoctonear(amount.0))
     }
     #[payable]
     pub fn sign_sepolia(&mut self, transfer: Transfer) -> Promise {

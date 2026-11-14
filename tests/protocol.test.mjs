@@ -21,7 +21,7 @@ const make = (wallet, extra = {}) => ({
   domain: `near:testnet:${contract}`,
   wallet,
   action: "link",
-  data: "{}",
+  data: '{"name":"maya"}',
   nonce: "0",
   deadline: String(Math.floor(Date.now() / 1000) + 120),
   ...extra,
@@ -50,7 +50,7 @@ test("ed25519 authorization binds every canonical message field", () => {
     false,
   );
 });
-test("policy rejects unbounded transfer, unexpected fields and excessive expiry", () => {
+test("shape checks reject bad fields and expiry; spending caps are left to the contract", () => {
   const r = make(evmWallet(Wallet.createRandom().address));
   for (const extra of [
     { action: "delete_account" },
@@ -66,12 +66,27 @@ test("policy rejects unbounded transfer, unexpected fields and excessive expiry"
     nonce: "0",
     gas_price_wei: "1000000000",
   };
-  assert.throws(() =>
-    validateRequest(
-      { ...r, action: "sign_sepolia", data: JSON.stringify(t) },
-      contract,
-    ),
-  );
+  // Over-cap values pass the client shape check on purpose: the contract refuses them on chain.
+  assert.ok(validateRequest({ ...r, action: "sign_sepolia", data: JSON.stringify(t) }, contract));
+  for (const [action, data] of [
+    ["link", { name: "Bad.Name" }],
+    ["link", { name: "a" }],
+    ["call", { contract: "wrap.testnet", method: "near_deposit", args: "{}", deposit: "-1" }],
+    ["call", { contract: "WRAP", method: "near_deposit", args: "{}", deposit: "1" }],
+    ["call", { contract: "wrap.testnet", method: "near_deposit", args: "not json", deposit: "1" }],
+    ["send_near", { to: "bob.testnet", amount: "0" }],
+    ["grant", { contract: "app.testnet", methods: [], max_deposit: "0", days: 7 }],
+    ["grant", { contract: "app.testnet", methods: ["go"], max_deposit: "0", days: 31 }],
+    ["revoke", { contract: "app.testnet", extra: 1 }],
+  ])
+    assert.throws(() => validateRequest({ ...r, action, data: JSON.stringify(data) }, contract));
+  for (const [action, data] of [
+    ["call", { contract: "wrap.testnet", method: "near_deposit", args: "{}", deposit: "500000000000000000000000" }],
+    ["send_near", { to: "bob.testnet", amount: "1" }],
+    ["grant", { contract: "guestbook.near-examples.testnet", methods: ["add_message"], max_deposit: "0", days: 7 }],
+    ["revoke", { contract: "app.testnet" }],
+  ])
+    assert.ok(validateRequest({ ...r, action, data: JSON.stringify(data) }, contract));
   t.value_wei = "0";
   const valid = { ...r, action: "sign_sepolia", data: JSON.stringify(t) };
   assert.equal(validateRequest(valid, contract), valid);

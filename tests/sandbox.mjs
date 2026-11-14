@@ -85,17 +85,32 @@ test(
       args: {},
       gas: 30_000_000_000_000n,
     });
-    let r = req(evmId, "link", 0),
+    const app = "app.test.near";
+    await root.createAccount({
+      newAccountId: app,
+      publicKey: key.getPublicKey(),
+      nearToTransfer: 5n * 10n ** 24n,
+    });
+    const appAccount = new Account(app, provider, new KeyPairSigner(key));
+    // A stand-in "app": the Tong account wasm, initialized with the app itself as controller.
+    await appAccount.deployContract(await readFile("packages/contract/res/tong_account.wasm"));
+    await appAccount.callFunction({ contractId: app, methodName: "new", args: { controller: app }, gas: 30_000_000_000_000n });
+    await run("name availability and bad names checked on chain", async () => {
+      assert.equal(await view(contract, "name_available", { name: "maya" }, url), true);
+      await assert.rejects(() => view(contract, "name_available", { name: "Bad.Name" }, url), /lowercase/);
+    });
+    let r = req(evmId, "link", 0, '{"name":"maya"}'),
       sig = await sign(r);
     await run(
       "valid EVM EIP-712 signature creates keyless controlled account",
       async () => {
         const out = await call(r, sig);
         assert.equal(out.ok, true, JSON.stringify(out));
-        assert.equal(
-          (await view(contract, "get_identity", { wallet: evmId }, url)).ready,
-          true,
-        );
+        const id = await view(contract, "get_identity", { wallet: evmId }, url);
+        assert.equal(id.ready, true);
+        assert.equal(id.account_id, `maya.${contract}`);
+        assert.equal(await view(contract, "owner_of", { account_id: `maya.${contract}` }, url), evmId);
+        assert.equal(id.policy.grants[0].contract, "wrap.testnet");
       },
     );
     await run("replay rejected on chain", () => reject(r, sig, /nonce|replay/));
@@ -144,7 +159,72 @@ test(
         /controller only/,
       );
     });
-    r = req(edId, "link", 0);
+    await run("a second wallet cannot take a used name", async () => {
+      const other = Wallet.createRandom();
+      const x = req(evmWallet(other.address), "link", 0, '{"name":"maya"}');
+      await reject(x, await sign(x, other), /name taken/);
+    });
+    const state = async () => (await view(contract, "get_identity", { wallet: evmId }, url));
+    const signed = async (action, data) => {
+      const x = req(evmId, action, (await state()).nonce, JSON.stringify(data));
+      return [x, await sign(x)];
+    };
+    await run("app call outside the allowlist refused on chain", async () => {
+      const [x, s] = await signed("call", { contract: app, method: "get_state", args: "{}", deposit: "0" });
+      await reject(x, s, /no permission for app.test.near/);
+    });
+    await run("method outside the grant refused on chain", async () => {
+      const [x, s] = await signed("call", { contract: "wrap.testnet", method: "ft_transfer", args: "{}", deposit: "1" });
+      await reject(x, s, /ft_transfer is not an allowed method/);
+    });
+    await run("deposit over the per-call cap refused on chain", async () => {
+      const [x, s] = await signed("call", { contract: "wrap.testnet", method: "near_deposit", args: "{}", deposit: "500000000000000000000000" });
+      await reject(x, s, /0.5 NEAR is over the 0.2 NEAR per-call limit/);
+    });
+    await run("signed grant adds an app permission", async () => {
+      const [x, s] = await signed("grant", { contract: app, methods: ["get_state", "set_note"], max_deposit: "50000000000000000000000", days: 7 });
+      const out = await call(x, s);
+      assert.equal(out.ok, true, JSON.stringify(out));
+      assert.ok((await state()).policy.grants.some((g) => g.contract === app));
+    });
+    await run("allowed app call executes from the named account", async () => {
+      const [x, s] = await signed("call", { contract: app, method: "get_state", args: "{}", deposit: "0" });
+      const out = await call(x, s);
+      assert.equal(out.ok, true, JSON.stringify(out));
+    });
+    await run("failed downstream app call gives the deposit back to the daily allowance", async () => {
+      const [x, s] = await signed("call", { contract: app, method: "set_note", args: '{"note":"x"}', deposit: "50000000000000000000000" });
+      const out = await call(x, s);
+      assert.equal(out.ok, false);
+      assert.equal((await state()).policy.spent_today, "0");
+    });
+    await run("NEAR send within the cap executes; over the cap refused", async () => {
+      let [x, s] = await signed("send_near", { to: "test.near", amount: "100000000000000000000000" });
+      let out = await call(x, s);
+      assert.equal(out.ok, true, JSON.stringify(out));
+      [x, s] = await signed("send_near", { to: "test.near", amount: "150000000000000000000000" });
+      await reject(x, s, /over the 0.1 NEAR per-transfer limit/);
+    });
+    await run("daily cap refused on chain", async () => {
+      for (let i = 0; i < 2; i++) {
+        const [x, s] = await signed("send_near", { to: "test.near", amount: "100000000000000000000000" });
+        assert.equal((await call(x, s)).ok, true);
+      }
+      const [x, s] = await signed("send_near", { to: "test.near", amount: "10000000000000000000000" });
+      await reject(x, s, /would pass today's 0.3 NEAR limit/);
+    });
+    await run("revoked app refused on chain", async () => {
+      let [x, s] = await signed("revoke", { contract: app });
+      assert.equal((await call(x, s)).ok, true);
+      [x, s] = await signed("call", { contract: app, method: "get_state", args: "{}", deposit: "0" });
+      await reject(x, s, /no permission/);
+    });
+    await run("a replayed signature is refused on chain", async () => {
+      const [x, s] = await signed("set_note", { note: "once" });
+      assert.equal((await call(x, s)).ok, true);
+      await reject(x, s, /wrong nonce or replay/);
+    });
+    r = req(edId, "link", 0, '{"name":"sol-friend"}');
     sig = hexlify(ed25519.sign(edMessage(r), edKey));
     await run(
       "valid ed25519 signature creates distinct controlled account",
@@ -174,7 +254,7 @@ test(
       const x = req(
         evmId,
         "sign_sepolia",
-        2,
+        (await state()).nonce,
         JSON.stringify({
           to: wallet.address,
           value_wei: "1000000000000001",

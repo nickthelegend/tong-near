@@ -15,11 +15,25 @@ import bs58 from "bs58";
 export const TESTNET_RPC = "https://test.rpc.fastnear.com";
 export const MPC_CONTRACT = "v1.signer-prod.testnet";
 export const DERIVATION_PATH = "tong:sepolia:11155111";
+// Deposit the relayer attaches per action. App deposits and NEAR transfers come from the user's own
+// NEAR account balance, never from the relayer, and are capped by the on-chain policy.
 export const FEES = Object.freeze({
-  link: "1650000000000000000000000",
+  link: "1900000000000000000000000",
   set_note: "0",
+  call: "0",
+  send_near: "0",
+  grant: "0",
+  revoke: "0",
   sign_sepolia: "10000000000000000000000",
 });
+export const NAME_RE = /^(?=.{2,32}$)[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
+export const ACCOUNT_RE = /^(?=.{2,64}$)(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
+const YOCTO = 10n ** 24n;
+export function parseNear(text) {
+  const m = /^\s*(\d+)(?:\.(\d{0,24}))?\s*$/.exec(String(text));
+  if (!m) throw new Error("Enter an amount like 0.1");
+  return BigInt(m[1]) * YOCTO + BigInt((m[2] ?? "").padEnd(24, "0") || "0");
+}
 export const TYPES = {
   TongRequest: [
     { name: "domain", type: "string" },
@@ -81,9 +95,15 @@ export function validateRequest(
     throw new Error("Data too large");
   if (!Object.hasOwn(FEES, r.action)) throw new Error("Disallowed action");
   const data = JSON.parse(r.data);
+  if (!data || typeof data !== "object" || Array.isArray(data))
+    throw new Error("Data must be a JSON object");
   const keys = Object.keys(data).sort().join(",");
-  if (r.action === "link" && r.data !== "{}")
-    throw new Error("Link data must be empty");
+  const uint = (v) => typeof v === "string" && /^(0|[1-9][0-9]*)$/.test(v);
+  const yocto = (v) => uint(v) && BigInt(v) < 2n ** 128n;
+  // Shape checks only. Spending limits (allowlist, caps, daily cap, expiry) are enforced by the
+  // contract on chain, so a relayer cannot loosen or tighten them.
+  if (r.action === "link" && (keys !== "name" || !NAME_RE.test(data.name)))
+    throw new Error("Choose a name: 2-32 lowercase letters, digits, - or _");
   if (
     r.action === "set_note" &&
     (keys !== "note" ||
@@ -91,6 +111,39 @@ export function validateRequest(
       new TextEncoder().encode(data.note).length > 256)
   )
     throw new Error("Invalid note");
+  if (r.action === "call") {
+    if (
+      keys !== "args,contract,deposit,method" ||
+      !ACCOUNT_RE.test(data.contract) ||
+      !/^[a-z0-9_]{1,64}$/.test(data.method) ||
+      typeof data.args !== "string" ||
+      data.args.length > 512 ||
+      !yocto(data.deposit)
+    )
+      throw new Error("Invalid app call");
+    JSON.parse(data.args);
+  }
+  if (
+    r.action === "send_near" &&
+    (keys !== "amount,to" || !ACCOUNT_RE.test(data.to) || !yocto(data.amount) || BigInt(data.amount) === 0n)
+  )
+    throw new Error("Invalid transfer");
+  if (
+    r.action === "grant" &&
+    (keys !== "contract,days,max_deposit,methods" ||
+      !ACCOUNT_RE.test(data.contract) ||
+      !Array.isArray(data.methods) ||
+      data.methods.length < 1 ||
+      data.methods.length > 4 ||
+      !data.methods.every((m) => /^[a-z0-9_]{1,64}$/.test(m)) ||
+      !yocto(data.max_deposit) ||
+      !Number.isInteger(data.days) ||
+      data.days < 1 ||
+      data.days > 30)
+  )
+    throw new Error("Invalid permission grant");
+  if (r.action === "revoke" && (keys !== "contract" || !ACCOUNT_RE.test(data.contract)))
+    throw new Error("Invalid revoke");
   if (r.action === "sign_sepolia") {
     if (
       keys !== "gas_price_wei,nonce,to,value_wei" ||
@@ -98,18 +151,8 @@ export function validateRequest(
     )
       throw new Error("Invalid transfer fields");
     for (const k of ["nonce", "value_wei", "gas_price_wei"])
-      if (
-        typeof data[k] !== "string" ||
-        !/^(0|[1-9][0-9]*)$/.test(data[k]) ||
-        BigInt(data[k]) >= 2n ** 64n
-      )
+      if (!uint(data[k]) || BigInt(data[k]) >= 2n ** 64n)
         throw new Error("Invalid transfer integer");
-    if (
-      BigInt(data.value_wei) > 10n ** 15n ||
-      BigInt(data.gas_price_wei) <= 0n ||
-      BigInt(data.gas_price_wei) > 100n * 10n ** 9n
-    )
-      throw new Error("Transfer exceeds policy");
   }
   return r;
 }
@@ -200,6 +243,7 @@ export async function view(
     },
     rpcUrl,
   );
+  if (r.error) throw new Error(r.error);
   return JSON.parse(new TextDecoder().decode(new Uint8Array(r.result)));
 }
 export async function deriveSepoliaAddress(accountId, rpcUrl = TESTNET_RPC) {
@@ -353,13 +397,41 @@ export class TongConnector {
     if (!response.ok)
       throw new Error(body.error ?? `Relayer HTTP ${response.status}`);
     await this.refresh();
+    if (body.ok === false)
+      // The transaction landed on NEAR and the contract refused it (policy, nonce, signature...).
+      throw Object.assign(new Error(body.reason ?? "Refused on chain"), {
+        refused: true,
+        txHash: body.txHash,
+        explorer: body.explorer,
+      });
     return body;
   }
   async execute(action, data = {}) {
     return this.submit(await this.authorize(await this.prepare(action, data)));
   }
-  async link() {
-    return this.execute("link");
+  /** Creates `<name>.<factory>`: a named NEAR account with zero keys, owned by this wallet's signature. */
+  async link(name) {
+    return this.execute("link", { name });
+  }
+  async nameAvailable(name) {
+    return view(this.contractId, "name_available", { name }, this.rpcUrl);
+  }
+  /** Calls any NEAR app the account's policy allows. `deposit` (yoctoNEAR) comes from the account's own balance. */
+  async call(contract, method, args = {}, deposit = "0") {
+    return this.execute("call", { contract, method, args: JSON.stringify(args), deposit: String(deposit) });
+  }
+  async sendNear(to, amount) {
+    return this.execute("send_near", { to, amount: String(amount) });
+  }
+  /** Asks the wallet to allow `methods` on `contract`, at most `maxDeposit` yoctoNEAR per call, for `days`. */
+  async grant(contract, methods, maxDeposit = "0", days = 7) {
+    return this.execute("grant", { contract, methods, max_deposit: String(maxDeposit), days });
+  }
+  async revoke(contract) {
+    return this.execute("revoke", { contract });
+  }
+  get policy() {
+    return this.identity?.policy ?? null;
   }
   async setNote(note) {
     return this.execute("set_note", { note });

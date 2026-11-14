@@ -18,8 +18,8 @@ if [ ! -x "$BIN" ]; then
 fi
 STATE=$(mktemp -d /tmp/tong-sandbox.XXXXXX)
 "$BIN" --home "$STATE" init > "$STATE/init.log" 2>&1
-"$BIN" --home "$STATE" run --rpc-addr 127.0.0.1:5380 --network-addr 127.0.0.1:5381 > "$STATE/node.log" 2>&1 &
+"$BIN" --home "$STATE" run --rpc-addr 127.0.0.1:${TONG_SANDBOX_PORT:-5318} --network-addr 127.0.0.1:$(( ${TONG_SANDBOX_PORT:-5318} + 1 )) > "$STATE/node.log" 2>&1 &
 SANDBOX_PID=$!
 trap 'kill "$SANDBOX_PID" 2>/dev/null || true; wait "$SANDBOX_PID" 2>/dev/null || true; rm -rf "$STATE"' EXIT
-for _ in $(seq 60); do curl -fs http://127.0.0.1:5380/status >/dev/null 2>&1 && break; sleep 0.5; done
-TONG_SANDBOX_KEY_FILE="$STATE/validator_key.json" TONG_SANDBOX_RPC=http://127.0.0.1:5380 node --test --test-concurrency=1 tests/sandbox.mjs
+for _ in $(seq 60); do curl -fs http://127.0.0.1:${TONG_SANDBOX_PORT:-5318}/status >/dev/null 2>&1 && break; sleep 0.5; done
+TONG_SANDBOX_KEY_FILE="$STATE/validator_key.json" TONG_SANDBOX_RPC=http://127.0.0.1:${TONG_SANDBOX_PORT:-5318} node --test --test-concurrency=1 tests/sandbox.mjs

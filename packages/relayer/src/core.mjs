@@ -97,8 +97,16 @@ export function decodeOutcome(outcome) {
     explorer: explorer(txHash),
     ok: !failure && result?.ok !== false,
     result,
-    failure: failure ?? (result?.ok === false ? result.error : null),
+    failure: failure ?? (result?.ok === false ? result.error ?? "downstream call failed" : null),
   };
+}
+/** Plain-language reason from a NEAR failure ("Smart contract panicked: policy: ..."). */
+export function refusalReason(failure) {
+  const text = typeof failure === "string" ? failure : JSON.stringify(failure ?? "");
+  const m = /panicked: ([^"\\]+)/.exec(text);
+  if (m) return m[1].trim();
+  if (/LackBalanceForState|NotEnoughBalance/.test(text)) return "Your NEAR account does not hold enough NEAR for that";
+  return text.slice(0, 200) || "Refused on chain";
 }
 export async function relay({
   authorization,
@@ -116,18 +124,8 @@ export async function relay({
     !verifyAuthorization(request, signature)
   )
     throw new Error("Invalid wallet signature");
-  const identity = await view(
-    contractId,
-    "get_identity",
-    { wallet: request.wallet },
-    rpcUrl,
-  );
-  if (request.nonce !== (identity?.nonce ?? "0"))
-    throw new Error("Wrong nonce or replay");
-  if (request.action === "link" ? identity !== null : !identity?.ready)
-    throw new Error(
-      request.action === "link" ? "Already linked" : "Link the wallet first",
-    );
+  // No policy, nonce or replay pre-checks here on purpose: the locked contract is the only judge.
+  // A refused request still lands on chain (and spends sponsored gas, counted in the budget).
   const gasPrice = BigInt((await rpc("gas_price", [null], rpcUrl)).gas_price);
   if (gasPrice > 150_000_000n)
     throw new Error("Network gas price exceeds sponsorship policy");
@@ -182,8 +180,12 @@ export async function relay({
     outcome,
   });
   if (!result.ok)
-    throw new Error(
-      `Transaction failed: ${result.txHash}. ${JSON.stringify(result.failure).slice(0, 240)}`,
-    );
+    return {
+      ok: false,
+      refused: true,
+      txHash: result.txHash,
+      explorer: result.explorer,
+      reason: refusalReason(result.failure),
+    };
   return result;
 }
