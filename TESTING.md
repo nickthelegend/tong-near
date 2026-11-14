@@ -2,7 +2,33 @@
 
 All test wallets are generated locally. No personal wallet, existing seed phrase or mainnet signing key is used. Testnet evidence is timestamped; inspect the live account for current nonces and balances.
 
-## Completed checks
+## v2 checks (November 14, 2026): named accounts and on-chain policy
+
+| Layer | Result | Evidence |
+| --- | --- | --- |
+| SDK, budget, RPC | **11 tests passed**: `pnpm test` | shape checks for `link`/`call`/`send_near`/`grant`/`revoke`; over-cap values pass the client check on purpose (the contract decides) |
+| WASM sandbox | **24 on-chain checks passed**: `pnpm test:sandbox` | [sandbox-tests.json](deployments/sandbox-tests.json) |
+| Live v2 rehearsal | 7 transactions on `tongid.testnet`: 5 succeeded, 2 refused on chain by policy | [deployments/v2/rehearsal.json](deployments/v2/rehearsal.json) |
+| Film take | Every action of the v8 film, live | [FLOW-QA.md](FLOW-QA.md) |
+
+The v2 sandbox cases add the following to the v1 list below:
+
+1. Name availability and invalid names are checked on chain.
+2. A second wallet cannot take a used name.
+3. An app call outside the allowlist is refused.
+4. A method outside the grant is refused.
+5. A deposit over the per-call cap is refused.
+6. A signed grant adds a permission.
+7. An allowed app call executes from the named account.
+8. A failed downstream call gives its deposit back to the daily allowance.
+9. A NEAR send within the cap executes, and one over the cap is refused.
+10. The daily cap is refused on chain.
+11. A revoked app is refused.
+12. A replayed signature is refused on chain.
+
+The sandbox now runs on ports **5318/5319** (`TONG_SANDBOX_PORT`), inside this project's assigned range.
+
+## v1 checks (historical)
 
 | Layer | Result | Evidence |
 | --- | --- | --- |
@@ -34,7 +60,7 @@ pnpm test:mcp
 
 `pnpm test` has no network dependency. It verifies typed-data and ed25519 signing, payload tampering, policy bounds, persisted budgets, concurrent reservation safety and missing-wallet errors.
 
-`pnpm test:sandbox` deploys the optimized factory WASM into near-sandbox 2.14.0-rc.4 and executes the actual host functions. It does not substitute a JavaScript signature verifier for the contract. The launcher uses ports **5380/5381**, creates local validator/account keys in a temporary directory, and kills its node and removes the directory on exit. Build first. Set `NEAR_SANDBOX_BIN` to an existing binary to avoid the download.
+`pnpm test:sandbox` deploys the optimized factory WASM into near-sandbox 2.14.0-rc.4 and executes the actual host functions. It does not substitute a JavaScript signature verifier for the contract. The launcher uses ports **5318/5319** (v1 used 5380/5381), creates local validator/account keys in a temporary directory, and kills its node and removes the directory on exit. Build first. Set `NEAR_SANDBOX_BIN` to an existing binary to avoid the download.
 
 Sandbox cases:
 

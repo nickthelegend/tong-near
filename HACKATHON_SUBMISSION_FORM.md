@@ -7,17 +7,39 @@ Not submitted. Do not send a second application for an already submitted reposit
 - Project: **Tong** (通, “to connect”)
 - Tracks: **`open`, `defi`, `security`**
 - Development: new application written November 12, 2026; supplied 3D assets and license preceded the application. No imported prior product implementation.
-- Deployment: **`tong-d8l0q0.testnet`**, locked, zero access keys.
+- Deployment: **`tongid.testnet`** (v2: named accounts and on-chain policy; locked before the final film, zero access keys). v1 `tong-d8l0q0.testnet` stays live and locked.
+- One-line pitch: **Tong gives your MetaMask or Phantom wallet a named NEAR account. A sponsor pays the gas, and the spending limits are enforced by the NEAR contract itself, not by an app.**
 
 ## Idea / what we built
 
-Tong lets an existing EVM or Solana wallet act on NEAR, with outbound Chain Signatures to Sepolia. A controlled NEAR account avoids creating another seed phrase. A Rust contract verifies EIP-712 secp256k1 or ed25519 signatures with NEAR host functions, binds every request to its factory domain, nonce and expiry, and executes only a small action allowlist. Each wallet gets a deterministic keyless subaccount. That child computes a bounded Sepolia transaction hash on chain and requests a real NEAR Chain Signature for its own derived address. The working entry includes a vanilla connector, React hook, gas-budgeted relayer, MCP read/prepare tools, and a pearl/coral playground with docs and inspectable receipts. Both signature types and signed NEAR actions ran on testnet. A real MPC response was assembled and verified; Sepolia broadcast is blocked by missing test ETH. 1Click is integrated as an honestly labeled live mainnet dry quote, with no transfer or testnet bridge claim.
+Tong lets an existing EVM or Solana wallet run a named NEAR account.
+
+- **Account:** one EIP-712 or ed25519 signature creates `maya.tongid.testnet`, an account with zero access keys controlled only by a locked Rust factory.
+- **Per-request checks:** the factory verifies every later request with NEAR host functions (`ecrecover`, `ed25519_verify`). It binds each request to its domain, a one-use nonce and a deadline of at most 5 minutes.
+- **On-chain policy:** each account has its own:
+  - app allowlist (contract + methods, per-call deposit cap, expiry);
+  - per-transfer cap;
+  - daily allowance.
+- **Live demos on testnet:**
+  - wrapping NEAR on `wrap.testnet`;
+  - a third-party dApp (the NEAR Guestbook) that asks for a grant through the SDK and posts;
+  - capped NEAR sends;
+  - a capped Sepolia transfer signed by Chain Signatures from the named account.
+- **Refusals are real:** the sponsor relayer pays gas but does no policy pre-check, so over-limit and unpermitted calls are refused on chain with a receipt.
+- **Developer surface:** an SDK, a React hook, MCP tools and a six-line demo dApp.
+
+The comparison with NEP-518, HOT, NEAR Intents, embedded wallets and function-call keys is in `docs/POSITIONING.md`. It states plainly where those are better (protocol-native, audited, larger user base).
+
+Not done:
+
+- The Sepolia transfer is signed, not broadcast, because the derived address has no test ETH.
+- 1Click is a labelled mainnet dry quote.
 
 ## Track rationale
 
-- Open: reusable foreign-wallet connector with a live NEAR contract and SDK.
+- Open: named NEAR accounts for EVM and Solana wallets, with a live contract, an SDK and a third-party demo dApp.
 - DeFi: outbound Chain Signatures plus live NEAR Intents 1Click dry quotes; neither a completed swap nor a funded Sepolia transaction is claimed.
-- Security: host signature verification, domain separation, strict nonces, expiry, keyless contracts and per-action limits, backed by adversarial WASM sandbox checks.
+- Security: host signature verification, domain separation, one-use nonces, expiry, keyless accounts, and per-account policy enforced on chain. This is backed by 24 adversarial WASM sandbox checks and live on-chain refusals.
 
 ## Human-owned fields still required
 
@@ -33,7 +55,7 @@ The final API payload must contain exactly `requestId`, `projectName`, `leadName
 
 Your wallet should be your way in — not another setup step.
 
-Built Tong 通 at NEAR HACKATHON: EVM + Solana signatures verified on NEAR, keyless accounts, and a real outbound Chain Signature. Sepolia broadcast awaits test ETH; 1Click is a dry quote.
+Built Tong 通 at NEAR HACKATHON: your MetaMask or Phantom wallet gets a named NEAR account, gas is sponsored, and spending limits are enforced on chain. It's live with wrap.testnet, the NEAR Guestbook and Chain Signatures. Sepolia broadcast awaits test ETH.
 
 @NEARProtocol #NEARHackathon
 
