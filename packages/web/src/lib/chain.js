@@ -143,6 +143,7 @@ const METHOD_LABEL = {
   near_withdraw: "Unwrapped NEAR",
   add_message: "Guestbook message",
   send_near: "NEAR sent",
+  get_state: "Permissions updated",
 };
 async function nearblocks(path) {
   const r = await fetch(`${NEARBLOCKS_API}${path}`, { signal: AbortSignal.timeout(20000) });
@@ -166,8 +167,8 @@ export async function accountActivity(accountId) {
   }
   return [...byTx.values()]
     .map((t) => {
-      const key = ["new", "near_deposit", "near_withdraw", "add_message", "send_near", "sign_sepolia", "set_note", "sign", "call_app"].find((m) => t.methods.includes(m));
-      const kind = key === "new" ? "link" : key === "set_note" ? "note" : ["near_deposit", "near_withdraw", "add_message", "call_app"].includes(key) ? "app" : key === "send_near" ? "transfer" : key ? "signature" : "transfer";
+      const key = ["new", "near_deposit", "near_withdraw", "add_message", "send_near", "sign_sepolia", "set_note", "sign", "call_app", "get_state"].find((m) => t.methods.includes(m));
+      const kind = key === "new" ? "link" : key === "set_note" ? "note" : ["near_deposit", "near_withdraw", "add_message", "call_app", "get_state"].includes(key) ? "app" : key === "send_near" ? "transfer" : key ? "signature" : "transfer";
       return { ...t, kind, label: METHOD_LABEL[key] ?? "Account receipt" };
     })
     .sort((a, b) => b.at - a.at);
