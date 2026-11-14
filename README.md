@@ -1,51 +1,98 @@
-# Tong 通 — EVM or Solana wallets on NEAR
+# Tong 通: your EVM or Solana wallet, a named NEAR account, limits NEAR enforces
 
-**Your EVM or Solana wallet, acting on NEAR — plus Chain Signatures to Sepolia.**
+**Tong gives your MetaMask or Phantom wallet a named NEAR account. A sponsor pays the gas, and the spending limits are enforced by the NEAR contract itself, not by an app.**
 
-Tong lets an EVM or Solana wallet authorize a small set of NEAR actions without creating a NEAR key. A Rust factory verifies the foreign signature on chain, creates a deterministic keyless subaccount, and forwards only approved actions. That child can request a real NEAR Chain Signature for a bounded Sepolia transfer.
+Sign one message with the wallet you already have and get `maya.tongid.testnet`, a NEAR account with zero access keys. From then on, every signed request runs through a locked Rust contract that checks:
 
-Built from scratch during NEAR HACKATHON, November 2026. Art generated with ChatGPT. Testnet only. MIT © 2026 Nivesh Gajengi. This is a prototype, not audited wallet infrastructure.
+- the signature (EIP-712 via `env::ecrecover`, or Solana ed25519 via `env::ed25519_verify`);
+- a one-use nonce and a deadline of at most 5 minutes;
+- your account's on-chain policy:
+  - which apps and methods are allowed;
+  - the per-call deposit cap;
+  - when each permission expires;
+  - the per-transfer cap;
+  - the daily allowance.
 
-## What works today
+Only then does it act. The same account can ask NEAR Chain Signatures to sign a capped Sepolia transfer.
 
-- EVM **EIP-712** signatures verified with NEAR `env::ecrecover`.
-- Solana **ed25519** message signatures verified with `env::ed25519_verify`.
-- Deterministic, separately deployed child accounts with **zero access keys**. The factory is also locked and has no upgrade method.
-- Signed NEAR note actions, strict nonces, five-minute maximum expiry, factory-specific domain separation and exact action schemas.
-- **Real MPC signature** returned by `v1.signer-prod.testnet`, assembled into a Sepolia transaction and checked against the derived address.
-- Vanilla connector, React hook, stdio MCP tools, a budgeted local relayer, and a responsive demo with integration docs.
-- Live 1Click **mainnet dry quote**. No deposit address is requested and no mainnet transaction is signed.
+Built during NEAR HACKATHON, November 2026. Testnet only. MIT © 2026 Nivesh Gajengi. This is a prototype, not audited wallet infrastructure.
 
-The outbound transfer has **not been broadcast**: the newly derived Sepolia address has zero test ETH. A verified signed transaction is saved; see [BLOCKED.md](BLOCKED.md). This implementation supports injected EVM and Solana message signers, NEAR testnet, and outbound Sepolia native transfers. It does not yet implement WalletConnect mobile transport, arbitrary dApp function calls, wallet recovery or a production funding bridge.
+## Why Tong, and where others are better
 
-Roadmap: “Any wallet, any chain” is a future goal, not the current support matrix.
+Several products already let an Ethereum or Solana wallet touch NEAR. Each works differently:
 
-## How Tong differs
+- **NEP-518 Ethereum accounts:** a `0x…` account that pays its own gas and has no per-action limits.
+- **NEAR Intents and HOT Omni:** they verify foreign signatures for a balance inside one contract.
+- **Embedded wallets:** they create a new key.
+- **Function-call keys:** they need a NEAR key and allow no deposits.
 
-EVM-wallet access to NEAR already exists. NEAR's [account documentation](https://docs.near.org/protocol/accounts-contracts/account-model#account-id) lists Ethereum-like accounts controlled by Ethereum wallets. The official [Ethereum wallets package](https://github.com/near/wallet-selector/blob/main/packages/ethereum-wallets/README.md) converts NEAR transaction inputs into Ethereum-compatible transactions. [NEP-518](https://github.com/near/NEPs/blob/master/neps/nep-0518.md#summary) specifies eth-implicit accounts and their wallet contract; those accounts are also created without access keys. Keylessness and EVM login alone are therefore not Tong's novelty.
+Tong combines all of these in one place:
 
-Tong implements a narrower combination, verified in this repository:
+- your existing wallet;
+- a readable name;
+- sponsored gas;
+- on-chain allowlists with caps, a daily allowance and expiry;
+- Chain Signatures.
 
-- **Solana ed25519 authorization:** a canonical Tong message is checked by `env::ed25519_verify`, alongside the EVM verifier. See the [factory implementation](packages/contract/src/lib.rs) and [live ed25519 link receipt](https://testnet.nearblocks.io/txns/DwQhSgSoNqKCLAJcx1r4qujcXV4mGwjXexTr5ktXWTq5).
-- **One keyless policy child per wallet:** Tong deploys its own child at a hash-derived subaccount, controlled only by its locked factory. This is Tong's application policy, not the native eth-implicit account implementation. See the [factory](packages/contract/src/lib.rs), [child contract](packages/contract/account/src/lib.rs), and [recorded key lists](deployments/lock-proof.json).
-- **On-chain-built outbound EIP-155 transactions:** the child builds the bounded Sepolia RLP and hash before requesting Chain Signatures. It does not accept an opaque hash to sign. See the [payload builder](packages/contract/account/src/lib.rs) and [verified MPC evidence](deployments/chain-signature.json).
-- **Strict action allowlist:** only account linking, a bounded note and bounded Sepolia native-transfer signing are allowed. This sacrifices general-purpose dApp execution for a small policy surface. See the [factory's allowed actions](packages/contract/src/lib.rs) and [security limits](docs/SECURITY.md).
+To be plain:
 
-These are implementation differences, not a claim that NEAR lacks ed25519 keys, policy contracts or Chain Signatures, nor a claim of a first-ever wallet connector. Real MetaMask and Phantom extension approvals remain manual checks.
+- NEP-518 is protocol-native and audited.
+- HOT has a far larger user base.
+- Privy's policy engine is more mature.
+
+Sourced comparison: [docs/POSITIONING.md](docs/POSITIONING.md). The same table is on the landing page.
+
+## What works today (live on NEAR testnet)
+
+- **Named accounts:** `link {"name":"maya"}` creates `maya.tongid.testnet`. The account is deployed with the Tong account contract, controlled only by the locked factory, and has zero access keys.
+- **Real NEAR apps:**
+  - wrap and unwrap NEAR on `wrap.testnet`;
+  - post to the NEAR Guestbook (`guestbook.near-examples.testnet`);
+  - send NEAR to any account.
+  
+  Deposits come from your own account; the sponsor pays only gas.
+- **On-chain policy:**
+  - Default grant: `wrap.testnet` (`near_deposit`, `near_withdraw`), at most 0.2 NEAR per call, valid for 30 days.
+  - Send cap: 0.1 NEAR per transfer.
+  - Daily allowance: 0.3 NEAR.
+  - Apps add grants with a signed `grant`, at most 1 NEAR per call and 30 days. `revoke` removes them.
+  - The relayer does **not** pre-filter policy, so over-limit and unpermitted calls are refused **on chain**, with a receipt.
+- **Chain Signatures:** the named account is the MPC predecessor. It builds a capped EIP-155 Sepolia transaction on chain and gets a real signature from `v1.signer-prod.testnet`.
+- **Developers:**
+  - `@tong/sdk`: `connect`, `link(name)`, `call`, `sendNear`, `grant`, `revoke`, `signSepolia`. Refusals throw `{ refused, txHash }`.
+  - A React hook and stdio MCP tools.
+  - `#/demo`, a separate Guestbook dApp built in six SDK lines.
+- **Live 1Click mainnet dry quote:** no deposit address is requested and nothing is signed.
+
+The Sepolia transfer is **signed, not broadcast**: derived addresses hold no Sepolia test ETH ([BLOCKED.md](BLOCKED.md)).
+
+Not supported yet:
+
+- WalletConnect mobile transport;
+- recovery;
+- a hosted relayer;
+- outbound chains other than Sepolia.
 
 ## Inspect the live proof
 
-Factory: [`tong-d8l0q0.testnet`](https://testnet.nearblocks.io/address/tong-d8l0q0.testnet).
+v2 factory: [`tongid.testnet`](https://testnet.nearblocks.io/address/tongid.testnet), deployed in [DBDzGrsX…](https://testnet.nearblocks.io/txns/DBDzGrsX3nZbXQ5zUfKsXjbxnfet5CU4FEhJg2arcnqQ). The film's own transactions are listed in [FLOW-QA.md](FLOW-QA.md).
 
-| Evidence | Result |
+| Evidence (v2 rehearsal, Nov 14) | Result |
 | --- | --- |
-| [EVM wallet linked](https://testnet.nearblocks.io/txns/cuGwhcFicW6tbBVdF1ytb5NzS2HWGwbnkMY6asMPteG) | Foreign signature created a keyless NEAR account |
-| [ed25519 wallet linked](https://testnet.nearblocks.io/txns/DwQhSgSoNqKCLAJcx1r4qujcXV4mGwjXexTr5ktXWTq5) | Independent keyless NEAR account |
-| [Signed NEAR note](https://testnet.nearblocks.io/txns/CDGpm3zuKjQMLHf5Lhg4n1shVVFJJtQpwU6c9qtsZiVh) | Note stored in the EVM user's child account |
-| [Chain Signatures request](https://testnet.nearblocks.io/txns/2s9kMWVT6UGVSn625LuMGgnTYPzd5e3ikRXZ9trxNUZy) | Real MPC response, recovered and serialized |
-| [Factory lock](https://testnet.nearblocks.io/txns/Am2uporPxoMYBo2V3NHvQSm3HxUtYXPRofeLDpv3f4H7) | Final full-access key deleted |
+| [Named account created](https://testnet.nearblocks.io/txns/A7maKkNgV6Rbys3Y1W43qfkP5i1Aop5EYK4DqEKRGBsz) | `rehearsal-7u589.tongid.testnet`, zero keys |
+| [Wrap 0.1 NEAR on wrap.testnet](https://testnet.nearblocks.io/txns/HLkyVk8D24BN1zaj9oM3TgPEbzxVaZpffitkqAHfzA2f) | 0.09875 wNEAR (0.00125 NEAR went to wNEAR storage) |
+| [Wrap 0.5 NEAR: refused](https://testnet.nearblocks.io/txns/CGc1uAArvQzQiJbqNzuf85Pdknpy4xxye6ZZgusC4pSV) | `policy: 0.5 NEAR is over the 0.2 NEAR per-call limit for wrap.testnet` |
+| [Guestbook before a grant: refused](https://testnet.nearblocks.io/txns/5MftM3q4GCfNtgPn3TusKpqKzE3M3MN2kpCYmCtN6LxZ) | `policy: no permission for guestbook.near-examples.testnet` |
+| [Grant the Guestbook](https://testnet.nearblocks.io/txns/H8btJuxGAvxNR71d9CwRopTR7baXfcUPVBwKQG1YAVqJ) | `add_message`, no deposit, 7 days |
+| [Guestbook message](https://testnet.nearblocks.io/txns/2wd1PhafVv16ggLgjQAy1wrTQ5bwQXQvkNPdjFWmfYjX) | Posted from the named account |
+| [Send 0.05 NEAR](https://testnet.nearblocks.io/txns/5muqUPm6U7jrZrpLG4eVHpn1ghFGjR1LeBUsZoRGkTps) | From the account's own balance |
 
-Full outcomes, including faucet funding and account creation, are in [deployments/transactions.json](deployments/transactions.json) and [deployments/faucet.json](deployments/faucet.json). [lock-proof.json](deployments/lock-proof.json) records empty access-key lists and the deployed code hash. [chain-signature.json](deployments/chain-signature.json) includes the MPC response, signing payload, raw signed transaction, recovered signer and gas funding requirement. [oneclick-dry-quote.json](deployments/oneclick-dry-quote.json) is a timestamped quote, not a current price or transfer receipt.
+Evidence files:
+
+- [deployments/v2/rehearsal.json](deployments/v2/rehearsal.json): the full policy state after the rehearsal.
+- [deployments/v2/relayer-topups.json](deployments/v2/relayer-topups.json): testnet faucet top-ups.
+
+The v1 factory `tong-d8l0q0.testnet` stays live and locked. It had hash-named accounts, notes and Chain Signatures only. Its evidence is kept in [deployments/v1/](deployments/v1/) and the original files listed in [TESTING.md](TESTING.md).
 
 ## Run it
 
@@ -82,16 +129,18 @@ To sponsor transactions, put a funded **testnet** relayer credential in a local,
 
 Try it:
 
-1. Connect a wallet, then **Sign & create account**. Expect a ready NEAR child and an explorer link after final execution.
-2. Type a note and select the arrow to **sign and save**. Expect the saved note read back from the live child and a NEAR receipt.
-3. Select **Sign a Sepolia test transaction**. Expect an MPC signature and a raw EIP-155 transaction for a zero-value self transfer. Signing alone does not broadcast it.
-4. Select **Get dry quote**. Expect a live 10 USDC Ethereum → NEAR quote clearly labeled mainnet and dry.
+1. **Connect**, pick a name and **Sign & create**. Expect `<name>.tongid.testnet` and an explorer link.
+2. **Apps → Wrapped NEAR**: wrap 0.1 NEAR. Then try 0.5 NEAR and **Sign anyway**. Expect a *Refused on chain* card with the contract's policy message and the receipt.
+3. **Act on NEAR → Send NEAR**: send 0.05 NEAR to any testnet account. Watch today's allowance meter move.
+4. **Developers → Open the demo dApp**: connect, **Allow for 7 days**, then **Sign & post** to the NEAR Guestbook.
+5. **Permissions**: see the grants, caps and today's spending, and revoke a grant.
+6. **Cross-chain**: get a Chain Signature for a zero-value Sepolia self transfer (signed, not broadcast).
 
 **Temporary test wallet** (on the connect screen) generates a fresh EVM key in browser memory. It is explicitly a test wallet, disappears on reload and does not connect an existing wallet. Its link still needs a real signature and spends sponsored testnet funds. Do not send assets to that temporary identity.
 
 The original demo was topped up with a separately recorded 8 test NEAR gas reserve (`node scripts/fund-relayer.mjs`). This does not raise its daily ceiling.
 
-The relayer rejects invalid signatures and stale nonces before broadcasting, serializes submissions and reserves deposits plus gas before each call. Default ceiling: 40 calls and 4 test NEAR reserved per UTC day. The budget ledger persists failed reservations. Gas price above 150 million yoctoNEAR per gas disables sponsorship. Relayer funding may run out before its budget ceiling.
+The relayer rejects malformed requests and invalid signatures, then leaves every other decision (nonce, replay, policy) to the contract, so refusals land on chain with a receipt. It serializes submissions and reserves deposits plus gas before each call. Default ceiling: 40 calls and 4 test NEAR reserved per UTC day (configurable up to 25 NEAR / 100 calls). The budget ledger persists failed reservations. Gas price above 150 million yoctoNEAR per gas disables sponsorship. Relayer funding may run out before its budget ceiling.
 
 ## Integrate
 
@@ -100,18 +149,20 @@ The relayer rejects invalid signatures and stale nonces before broadcasting, ser
 ```js
 import { TongConnector } from '@tong/sdk';
 const tong = new TongConnector({
-  contractId: 'tong-d8l0q0.testnet',
+  contractId: 'tongid.testnet',
   relayerUrl: 'http://127.0.0.1:5311'
 });
-await tong.connect('evm'); // or 'solana'
-await tong.link();
-await tong.setNote('Hello, NEAR.');
+await tong.connect('evm');                       // or 'solana'
+await tong.link('maya');                         // maya.tongid.testnet
+await tong.grant('guestbook.near-examples.testnet', ['add_message'], '0', 7);
+await tong.call('guestbook.near-examples.testnet', 'add_message', { text: 'gm' });
+// Over a limit? The promise rejects with e.refused === true and e.txHash (the on-chain receipt).
 ```
 
 ```jsx
 import { useTong } from '@tong/sdk/react';
-const tong = useTong({ contractId: 'tong-d8l0q0.testnet', relayerUrl });
-// Expose tong.connect, tong.link, tong.setNote, tong.signSepolia in your UI.
+const tong = useTong({ contractId: 'tongid.testnet', relayerUrl });
+// tong.connect, link, call, sendNear, grant, revoke, setNote, signSepolia
 // Render tong.pending and tong.error; catch rejected promises in click handlers.
 ```
 
@@ -125,22 +176,24 @@ sequenceDiagram
   participant S as Tong SDK
   participant R as Bounded relayer
   participant F as Locked NEAR factory
-  participant A as Keyless NEAR child
+  participant A as Named keyless account (maya.tongid.testnet)
+  participant App as NEAR app
   participant M as Testnet MPC signer
   W->>S: Sign domain + action + data + nonce + expiry
   S->>R: Signed request
   R->>F: execute(request, signature)
-  F->>F: Verify host signature + policy; consume nonce
-  F->>A: Create / save note / sign Sepolia
+  F->>F: Verify signature, nonce, expiry and the account's policy
+  F->>A: Create / call app / send NEAR / note / sign Sepolia
+  A->>App: wrap.testnet, guestbook, ... (deposit from A's own balance)
   A->>M: sign(payload computed on chain, path, domain 0)
   M-->>S: Signature through NEAR promise chain
 ```
 
-Canonical EVM identity: `evm:0x<40 lowercase hex>`. Solana: `solana:<64 lowercase public-key hex>`. A child is `first40hex(SHA256(wallet)).<factory>`. MPC derivation uses **the child account as predecessor**, path `tong:sepolia:11155111`, domain 0 (secp256k1). The relayer never owns the derived address.
+Canonical EVM identity: `evm:0x<40 lowercase hex>`. Solana: `solana:<64 lowercase public-key hex>`. An account is `<name>.<factory>`: 2–32 lowercase letters, digits, `-` or `_`, first come first served, one per wallet. MPC derivation uses **the child account as predecessor**, path `tong:sepolia:11155111`, domain 0 (secp256k1). The relayer never owns the derived address.
 
-Allowed actions are `link`, `set_note` (≤256 UTF-8 bytes), and `sign_sepolia`. The outbound contract constructs legacy EIP-155 RLP itself: Sepolia chain ID 11155111, 21,000 gas, no calldata, native value ≤0.001 ETH and gas price ≤100 gwei. It never signs a user-supplied opaque hash. The SDK's Sepolia demo is a zero-value self transfer.
+Allowed actions are `link`, `call`, `send_near`, `grant`, `revoke`, `set_note` (≤256 UTF-8 bytes) and `sign_sepolia`. `call` and `send_near` are checked against the account's policy in the same receipt that consumes the nonce. A downstream failure gives the amount back to the daily allowance. The outbound contract constructs legacy EIP-155 RLP itself: Sepolia chain ID 11155111, 21,000 gas, no calldata, native value ≤0.001 ETH and gas price ≤100 gwei. It never signs a user-supplied opaque hash. The SDK's Sepolia demo is a zero-value self transfer.
 
-The five-minute request window is independent of the eventual MPC response time. A copied signed request may be relayed first, but its destination, complete action data and nonce are fixed. It cannot be changed or executed twice. The factory cannot upgrade a child, add a key, delete an account, transfer its NEAR balance or change the policy. These constraints deliberately limit usefulness as well as attack surface; read [docs/SECURITY.md](docs/SECURITY.md).
+The five-minute request window is independent of the eventual MPC response time. A copied signed request may be relayed first, but its destination, complete action data and nonce are fixed. It cannot be changed or executed twice. The factory cannot upgrade an account, add a key or delete an account. It moves NEAR only through `send_near` and app deposits inside the policy the wallet signed for. These constraints deliberately limit usefulness as well as attack surface; read [docs/SECURITY.md](docs/SECURITY.md).
 
 ## Agent tools
 
