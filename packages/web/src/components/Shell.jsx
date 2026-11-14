@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Home,
   LayoutGrid,
@@ -103,6 +103,11 @@ function AccountMenu() {
 export function Shell({ route, title, subtitle, actions, children }) {
   const tong = useTongApp();
   const [more, setMore] = useState(false);
+  // Other apps (like the SDK demo dApp) can change this account's policy: re-read it on every screen change.
+  const refresh = tong.refresh;
+  useEffect(() => {
+    refresh();
+  }, [route, refresh]);
   const isActive = (to) => route === to || (to !== "#/app" && route.startsWith(to + "/"));
   return (
     <div className="shell">

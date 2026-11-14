@@ -187,12 +187,23 @@ export async function rpc(method, params, rpcUrl = TESTNET_RPC) {
   );
   for (let attempt = 0; ; attempt++) {
     const url = readOnly && attempt >= 2 && rpcUrl === TESTNET_RPC ? TESTNET_READ_FALLBACK : rpcUrl;
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ jsonrpc: "2.0", id: "tong", method, params }),
-      signal: AbortSignal.timeout(20000),
-    });
+    let response;
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: "tong", method, params }),
+        signal: AbortSignal.timeout(20000),
+      });
+    } catch (error) {
+      // A rate-limit reply without CORS headers surfaces as a network error in browsers: retry reads only.
+      if (readOnly && attempt < 3) {
+        if (rpcUrl === TESTNET_RPC && attempt < 2) attempt = 1;
+        await new Promise((r) => setTimeout(r, 400));
+        continue;
+      }
+      throw error;
+    }
     if (!response.ok) {
       const retry =
         readOnly &&

@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-14T10:22:43.647Z",
+  "factory": "tongid.testnet",
+  "lock_tx": "H6cmi5CALSeEFywLVwPeSBQY9QJ2rocPbSnsWJNWMa12",
+  "access_keys": [],
+  "code_hash": "EDcGAY5Z2smipWZLv3a3KGNrUwcuoBFriTv3sDac6PzJ",
+  "children": {
+    "rehearsal-7u589.tongid.testnet": {
+      "access_keys": 0
+    },
+    "sam.tongid.testnet": {
+      "access_keys": 0
+    }
+  }
+}

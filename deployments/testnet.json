@@ -10,8 +10,11 @@
     "deploy": "DBDzGrsX3nZbXQ5zUfKsXjbxnfet5CU4FEhJg2arcnqQ",
     "init": "77ZgbP1XCnQMgaMsACvtqahYxBotvTnfhFiD9P7guzSt"
   },
-  "locked": false,
+  "locked": true,
   "mpc_contract": "v1.signer-prod.testnet",
   "derivation_path": "tong:sepolia:11155111",
-  "previous": "deployments/v1/testnet.json"
+  "previous": "deployments/v1/testnet.json",
+  "locked_at": "2026-11-14T10:22:43.647Z",
+  "code_hash": "EDcGAY5Z2smipWZLv3a3KGNrUwcuoBFriTv3sDac6PzJ",
+  "lock_tx": "H6cmi5CALSeEFywLVwPeSBQY9QJ2rocPbSnsWJNWMa12"
 }
